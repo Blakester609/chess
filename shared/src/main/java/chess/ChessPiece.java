@@ -1,6 +1,6 @@
 package chess;
 
-import chess.pieces.PieceMovesCalculator;
+import chess.pieces.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +13,20 @@ import java.util.Collection;
  */
 public class ChessPiece {
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessPiece{" +
+                "pieceColor=" + pieceColor +
+                ", type=" + type +
+                '}';
     }
 
     /**
@@ -39,7 +52,7 @@ public class ChessPiece {
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return this.type;
     }
 
     /**
@@ -50,6 +63,27 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        PieceMovesCalculator pmc = null;
+        switch (getPieceType()) {
+            case KING:
+                pmc = new KingMovesCalculator();
+                break;
+            case QUEEN:
+                pmc = new QueenMovesCalculator();
+                break;
+            case BISHOP:
+                pmc = new BishopMovesCalculator();
+                break;
+            case KNIGHT:
+                pmc = new KnightMovesCalculator();
+                break;
+            case ROOK:
+                pmc = new RookMovesCalculator();
+                break;
+            case PAWN:
+                pmc = new PawnMovesCalculator();
+                break;
+        }
+        return pmc.pieceMoves(board, myPosition);
     }
 }
