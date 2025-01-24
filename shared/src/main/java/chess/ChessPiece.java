@@ -1,5 +1,7 @@
 package chess;
 
+import chess.pieces.PieceMovesCalculator;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
