@@ -25,6 +25,9 @@ public class KnightMovesCalculator implements PieceMovesCalculator {
             System.out.println(position);
             int newRow = position.getRow() + possibleMove[0];
             int newCol = position.getColumn() + possibleMove[1];
+            if(isStuck(board, newRow, newCol)) {
+                continue;
+            }
             if (((newRow <= 8) && (newRow >= 1)) && ((newCol <= 8) && (newCol >= 1))) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
                 ChessMove newMove = new ChessMove(position, newPos, null);
@@ -35,6 +38,12 @@ public class KnightMovesCalculator implements PieceMovesCalculator {
         return validMoves;
     }
 
+    public boolean isStuck(ChessBoard board, int newRow, int newCol) {
+        if ((newCol <= 8 && newCol >= 1) && (newRow <= 8 && newRow >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == this.pieceColor;
+        }
+        return false;
+    }
 
     @Override
     public boolean equals(Object o) {
