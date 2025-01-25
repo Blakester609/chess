@@ -24,7 +24,10 @@ public class KingMovesCalculator implements PieceMovesCalculator {
         for (int[] possibleMove : possibleMoves) {
             int newRow = position.getRow() + possibleMove[0];
             int newCol = position.getColumn() + possibleMove[1];
-            if (((newRow < 8) && (newRow >= 0)) && ((newCol < 8) && (newCol >= 0))) {
+            if(isStuck(board, newRow, newCol)) {
+                continue;
+            }
+            if (((newRow <= 8) && (newRow >= 1)) && ((newCol <= 8) && (newCol >= 1))) {
                 ChessPosition newPos = new ChessPosition(newRow, newCol);
                 ChessMove newMove = new ChessMove(position, newPos, null);
                 validMoves.add(newMove);
@@ -32,6 +35,20 @@ public class KingMovesCalculator implements PieceMovesCalculator {
 
         }
         return validMoves;
+    }
+
+    public boolean isStuck(ChessBoard board, int newRow, int newCol) {
+        if ((newCol <= 8 && newCol >= 1) && (newRow <= 8 && newRow >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == this.pieceColor;
+        }
+        return false;
+    }
+
+    public boolean validateCanCapture(ChessBoard board, int newRow, int newCol) {
+        if ((newCol <= 8 && newCol >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != this.pieceColor;
+        }
+        return false;
     }
 
     @Override
