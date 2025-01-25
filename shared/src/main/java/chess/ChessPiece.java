@@ -66,19 +66,19 @@ public class ChessPiece {
         PieceMovesCalculator pmc = null;
         switch (getPieceType()) {
             case KING:
-                pmc = new KingMovesCalculator();
+                pmc = new KingMovesCalculator(getTeamColor());
                 break;
             case QUEEN:
-                pmc = new QueenMovesCalculator();
+                pmc = new QueenMovesCalculator(getTeamColor());
                 break;
             case BISHOP:
-                pmc = new BishopMovesCalculator();
+                pmc = new BishopMovesCalculator(getTeamColor());
                 break;
             case KNIGHT:
-                pmc = new KnightMovesCalculator();
+                pmc = new KnightMovesCalculator(getTeamColor());
                 break;
             case ROOK:
-                pmc = new RookMovesCalculator();
+                pmc = new RookMovesCalculator(getTeamColor());
                 break;
             case PAWN:
                 pmc = new PawnMovesCalculator(getTeamColor());

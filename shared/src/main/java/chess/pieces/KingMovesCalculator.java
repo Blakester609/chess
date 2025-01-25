@@ -1,6 +1,7 @@
 package chess.pieces;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPosition;
 
@@ -11,7 +12,13 @@ import java.util.Objects;
 
 public class KingMovesCalculator implements PieceMovesCalculator {
     ArrayList<ChessMove> validMoves = new ArrayList<>();
+    private final ChessGame.TeamColor pieceColor;
     private final int[][] possibleMoves = {{1,0}, {1,1}, {0,1}, {-1, 1}, {-1,0}, {-1,-1}, {0, -1}, {1, -1} };
+
+    public KingMovesCalculator(ChessGame.TeamColor pieceColor) {
+        this.pieceColor = pieceColor;
+    }
+
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
         for (int[] possibleMove : possibleMoves) {
