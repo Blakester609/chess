@@ -17,6 +17,8 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
+
+
     public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
@@ -100,5 +102,44 @@ public class ChessPiece {
                 break;
         }
         return pmc.pieceMoves(board, myPosition);
+    }
+
+    public static boolean isStuck(ChessBoard board, int newRow, int newCol, ChessGame.TeamColor pieceColor) {
+        if ((newCol <= 8 && newCol >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == pieceColor;
+        }
+        return false;
+    }
+
+    public static boolean validateCanCapture(ChessBoard board, int newRow, int newCol, ChessGame.TeamColor pieceColor) {
+        if ((newCol <= 8 && newCol >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() != pieceColor;
+        }
+        return false;
+    }
+
+    public static ArrayList<ChessMove> addMovesFromList(ChessBoard board, ChessPosition position, ChessGame.TeamColor pieceColor, int[][] possibleMoves) {
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        for (int[] possibleMove : possibleMoves) {
+            int newRow = position.getRow() + possibleMove[0];
+            int newCol = position.getColumn() + possibleMove[1];
+            if(isStuckEdge(board, newRow, newCol, pieceColor)) {
+                continue;
+            }
+            if (((newRow <= 8) && (newRow >= 1)) && ((newCol <= 8) && (newCol >= 1))) {
+                ChessPosition newPos = new ChessPosition(newRow, newCol);
+                ChessMove newMove = new ChessMove(position, newPos, null);
+                validMoves.add(newMove);
+            }
+
+        }
+        return validMoves;
+    }
+
+    public static boolean isStuckEdge(ChessBoard board, int newRow, int newCol, ChessGame.TeamColor pieceColor) {
+        if ((newCol <= 8 && newCol >= 1) && (newRow <= 8 && newRow >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == pieceColor;
+        }
+        return false;
     }
 }

@@ -9,67 +9,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class QueenMovesCalculator extends BishopMovesCalculator implements PieceMovesCalculator  {
+import static chess.ChessPiece.isStuck;
+
+public class QueenMovesCalculator implements PieceMovesCalculator  {
 
     ArrayList<ChessMove> validMoves = new ArrayList<>();
+    private final ChessGame.TeamColor pieceColor;
     public QueenMovesCalculator(ChessGame.TeamColor pieceColor) {
-        super(pieceColor);
+         this.pieceColor = pieceColor;
     }
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition position) {
-        validMoves = (ArrayList<ChessMove>) super.pieceMoves(board, position);
         int rowPos = position.getRow();
         int colPos = position.getColumn();
-        while(colPos < 8) {
-            ChessPosition newPos = new ChessPosition(rowPos, colPos += 1);
-            if(isStuck(board, rowPos, colPos)) {
-                break;
-            }
-            ChessMove newMove = new ChessMove(position, newPos, null);
-            validMoves.add(newMove);
-            if(validateCanCapture(board, rowPos, colPos)) {
-                break;
-            }
-        }
-        rowPos = position.getRow();
-        colPos = position.getColumn();
-        while(colPos > 1) {
-            ChessPosition newPos = new ChessPosition(rowPos, colPos -= 1);
-            if(isStuck(board, rowPos, colPos)) {
-                break;
-            }
-            ChessMove newMove = new ChessMove(position, newPos, null);
-            validMoves.add(newMove);
-            if(validateCanCapture(board, rowPos, colPos)) {
-                break;
-            }
-        }
-        rowPos = position.getRow();
-        colPos = position.getColumn();
-        while(rowPos < 8) {
-            ChessPosition newPos = new ChessPosition(rowPos +=1, colPos);
-            if(isStuck(board, rowPos, colPos)) {
-                break;
-            }
-            ChessMove newMove = new ChessMove(position, newPos, null);
-            validMoves.add(newMove);
-            if(validateCanCapture(board, rowPos, colPos)) {
-                break;
-            }
-        }
-        rowPos = position.getRow();
-        colPos = position.getColumn();
-        while(rowPos > 1) {
-            ChessPosition newPos = new ChessPosition(rowPos -=1, colPos);
-            if(isStuck(board, rowPos, colPos)) {
-                break;
-            }
-            ChessMove newMove = new ChessMove(position, newPos, null);
-            validMoves.add(newMove);
-            if(validateCanCapture(board, rowPos, colPos)) {
-                break;
-            }
-        }
+        validMoves = BishopMovesCalculator.getDiagonalMoves(rowPos, colPos, board, position, this.pieceColor);
+        validMoves.addAll(RookMovesCalculator.getHorizontalMoves(rowPos, colPos, board, position, this.pieceColor));
         return validMoves;
     }
 }
