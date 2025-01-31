@@ -13,7 +13,7 @@ public class ChessGame {
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard gameBoard;
     public ChessGame() {
-
+        this.gameBoard = new ChessBoard();
     }
 
     /**
