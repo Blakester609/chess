@@ -105,7 +105,7 @@ public class ChessPiece {
     }
 
     public static boolean isStuck(ChessBoard board, int newRow, int newCol, ChessGame.TeamColor pieceColor) {
-        if ((newCol <= 8 && newCol >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
+        if ((newCol <= 8 && newCol >= 1) && (newRow <= 8 && newRow >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
             return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == pieceColor;
         }
         return false;
