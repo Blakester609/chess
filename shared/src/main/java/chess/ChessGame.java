@@ -18,7 +18,9 @@ public class ChessGame {
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard gameBoard;
     public ChessGame() {
-
+        ChessBoard newBoard = new ChessBoard();
+        newBoard.resetBoard();
+        setBoard(newBoard);
     }
 
     /**
@@ -67,10 +69,10 @@ public class ChessGame {
             chessTeam = BLACK;
         }
 
-        System.out.println(kingPos);
-        System.out.println(getTeamTurn());
+//        System.out.println(kingPos);
+//        System.out.println(getTeamTurn());
         ArrayList<ChessMove> validMoves = new ArrayList<>();
-        System.out.println(getBoard());
+//        System.out.println(getBoard());
         for(ChessMove pieceMove : pieceToMove.pieceMoves(getBoard(), startPosition)) {
             if(isValidMove(pieceToMove, kingPos, startPosition, pieceMove, chessTeam)) {
                 validMoves.add(pieceMove);
@@ -95,6 +97,9 @@ public class ChessGame {
         if(isCheck) {
             getBoard().addPiece(startPosition, piece);
             getBoard().removePiece(possibleMove.getEndPosition());
+            if(tempPosition != null && tempPiece != null) {
+                getBoard().addPiece(tempPosition, tempPiece);
+            }
             return false;
         }
         getBoard().addPiece(startPosition, piece);
@@ -158,7 +163,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        boolean isInCheckmate = true;
+//        boolean isInCheckmate = false;
         TeamColor opposingColor;
         if(teamColor == WHITE) {
             opposingColor = BLACK;
@@ -167,21 +172,51 @@ public class ChessGame {
         }
         if(isInCheck(teamColor)) {
             ChessPosition kingPos = getKingPosition(teamColor);
-            System.out.println(kingPos);
+            System.out.println("King Pos in IsInCheckmate Func: " + kingPos);
             ChessPiece king = getBoard().getPiece(kingPos);
             ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) validMoves(kingPos);
-            for(ChessMove move : kingMoves) {
-                if(!isInCheck(move.getEndPosition(), opposingColor)) {
-                    System.out.print("Not in check: ");
-                    System.out.println(move);
-                    isInCheckmate = false;
+            if(kingMoves.isEmpty()) {
+                for(int i = 1; i <= 8; i++ ) {
+                    for(int j = 1; j <= 8; j++) {
+                        ChessPosition pos = new ChessPosition(i, j);
+                        ChessPiece newPiece = getBoard().getPiece(pos);
+                        if(newPiece != null) {
+                            if(newPiece.getTeamColor() == teamColor) {
+                                ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) validMoves(pos);
+                                for(ChessMove move: thisPieceMoves) {
+                                    ChessPosition tempPosition = null;
+                                    ChessPiece tempPiece = null;
+                                    if(getBoard().getPiece(move.getEndPosition()) != null ) {
+                                        tempPosition = move.getEndPosition();
+                                        tempPiece = getBoard().getPiece(move.getEndPosition());
+                                    }
+                                    getBoard().addPiece(move.getEndPosition(), newPiece);
+                                    getBoard().removePiece(move.getStartPosition());
+                                    if(!isInCheck(teamColor)) {
+                                        getBoard().addPiece(move.getStartPosition(), newPiece);
+                                        getBoard().removePiece(move.getEndPosition());
+                                        if(tempPosition != null && tempPiece != null) {
+                                            getBoard().addPiece(tempPosition, tempPiece);
+                                        }
+                                        return false;
+                                    }
+                                    getBoard().addPiece(move.getStartPosition(), newPiece);
+                                    getBoard().removePiece(move.getEndPosition());
+                                    if(tempPosition != null && tempPiece != null) {
+                                        getBoard().addPiece(tempPosition, tempPiece);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                return true;
             }
         }
         if(teamColor != getTeamTurn()) {
-            isInCheckmate = false;
+            return false;
         }
-        return isInCheckmate;
+        return false;
     }
 
     /**
@@ -192,7 +227,36 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return false;
+        ChessPosition kingPos = getKingPosition(teamColor);
+        ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) validMoves(kingPos);
+        ArrayList<Boolean> canMovePieces = new ArrayList<>();
+        if(isInCheckmate(teamColor)) {
+            return false;
+        }
+        if(!isInCheck(teamColor)) {
+            if(kingMoves.isEmpty()) {
+                for(int i = 1; i <= 8; i++) {
+                    for(int j = 1; j <= 8; j++) {
+                        ChessPosition pos = new ChessPosition(i, j);
+                        ChessPiece newPiece = getBoard().getPiece(pos);
+                        if(newPiece != null) {
+                            if(newPiece.getTeamColor() == teamColor) {
+                                ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) validMoves(pos);
+                                if(thisPieceMoves.isEmpty()) {
+                                    canMovePieces.add(true);
+                                } else {
+                                    canMovePieces.add(false);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(teamColor != getTeamTurn()) {
+            return false;
+        }
+        return canMovePieces.isEmpty() || !canMovePieces.contains(false);
     }
 
     /**
@@ -201,6 +265,11 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
+//        if(getBoard() != null) {
+//            this.gameBoard.clearBoard();
+//            System.out.println("New Board " + this.gameBoard);
+//        }
+
         this.gameBoard = board;
     }
 
@@ -237,6 +306,8 @@ public class ChessGame {
     }
 
     private boolean isInCheck(ChessPosition kingPosition, TeamColor opposingColor) {
+        System.out.println(kingPosition);
+//        System.out.println(getBoard());
         for(int i = 1; i <= 8; i++) {
             for(int j = 1; j <= 8; j++) {
                 ChessPosition pos = new ChessPosition(i, j);
@@ -245,17 +316,18 @@ public class ChessGame {
                     if(piece.getTeamColor() == opposingColor) {
                         ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) piece.pieceMoves(getBoard(), pos);
                         if(piece.getPieceType() == PAWN) {
+//                            System.out.println(piece);
                             boolean couldCheck = isCouldCheck(kingPosition, opposingColor, pos);
                             System.out.print("Pawn could check: ");
                             System.out.println(couldCheck);
                             if(couldCheck) {
-                                return couldCheck;
+                                return true;
                             }
                         }
                         for(ChessMove move: thisPieceMoves) {
                             if(kingPosition.equals(move.getEndPosition())) {
-                                System.out.println(piece);
-                                System.out.println(move);
+//                                System.out.println(piece);
+//                                System.out.println(move);
                                 return true;
                             }
                         }
