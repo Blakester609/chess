@@ -16,7 +16,7 @@ public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
 
     public ChessBoard() {
-        resetBoard();
+
     }
 
     /**
@@ -72,45 +72,12 @@ public class ChessBoard {
         }
     }
 
-    public boolean isWhiteInCheck() {
-        ChessPosition whiteKingPos = getKingPosition(WHITE);
-        for(int i = 1; i < 9; i++) {
-            for(int j = 1; j < 9; j++) {
-                ChessPosition pos = new ChessPosition(i, j);
-                if(this.getPiece(pos) != null) {
-                    ChessPiece piece = this.getPiece(pos);
-                    if(piece.getTeamColor() == BLACK) {
-                        ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) piece.pieceMoves(this, pos);
-                        for(ChessMove move: thisPieceMoves) {
-                            if(whiteKingPos == move.getEndPosition()) {
-                                return true;
-                            }
-                        }
-                    }
-
-                }
-            }
-        }
-        return false;
-    }
 
 
 
 
-    private ChessPosition getKingPosition(ChessGame.TeamColor color ) {
-        for(int i = 1; i < 9; i++) {
-            for(int j = 1; j < 9; j++) {
-                ChessPosition pos = new ChessPosition(i, j);
-                if(this.getPiece(pos) != null) {
-                    ChessPiece piece = this.getPiece(pos);
-                    if(piece.getPieceType() == KING && piece.getTeamColor() == color) {
-                        return pos;
-                    }
-                }
-            }
-        }
-        return new ChessPosition(1, 1);
-    }
+
+
 
     public boolean isBlackInCheck() {
         return false;
