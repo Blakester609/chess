@@ -5,8 +5,7 @@ import java.util.Collection;
 
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
-import static chess.ChessPiece.PieceType.KING;
-import static chess.ChessPiece.PieceType.PAWN;
+import static chess.ChessPiece.PieceType.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -54,10 +53,57 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        if (getBoard().getPiece(startPosition) == null) {
+        ChessPiece pieceToMove = getBoard().getPiece(startPosition);
+        TeamColor chessTeam;
+        if (pieceToMove == null) {
             return null;
         }
-        return null;
+        ChessPosition kingPos = null;
+        if(pieceToMove.getTeamColor() == WHITE) {
+            kingPos = getKingPosition(WHITE);
+            chessTeam = WHITE;
+        } else {
+            kingPos = getKingPosition(BLACK);
+            chessTeam = BLACK;
+        }
+
+        System.out.println(kingPos);
+        System.out.println(getTeamTurn());
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        System.out.println(getBoard());
+        for(ChessMove pieceMove : pieceToMove.pieceMoves(getBoard(), startPosition)) {
+            if(isValidMove(pieceToMove, kingPos, startPosition, pieceMove, chessTeam)) {
+                validMoves.add(pieceMove);
+            }
+        }
+        return validMoves;
+    }
+
+
+    private boolean isValidMove(ChessPiece piece, ChessPosition kingPosition, ChessPosition startPosition, ChessMove possibleMove, TeamColor chessTeam) {
+        ChessPosition tempPosition = null;
+        ChessPiece tempPiece = null;
+
+        if(getBoard().getPiece(possibleMove.getEndPosition()) != null ) {
+            tempPosition = possibleMove.getEndPosition();
+            tempPiece = getBoard().getPiece(possibleMove.getEndPosition());
+        }
+        getBoard().addPiece(possibleMove.getEndPosition(), piece);
+        getBoard().removePiece(startPosition);
+        boolean isCheck = isInCheck(chessTeam);
+        System.out.println("Is check: " + isCheck);
+        if(isCheck) {
+            getBoard().addPiece(startPosition, piece);
+            getBoard().removePiece(possibleMove.getEndPosition());
+            return false;
+        }
+        getBoard().addPiece(startPosition, piece);
+        getBoard().removePiece(possibleMove.getEndPosition());
+        if(tempPosition != null && tempPiece != null) {
+            getBoard().addPiece(tempPosition, tempPiece);
+        }
+
+        return true;
     }
 
     /**

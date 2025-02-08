@@ -40,6 +40,10 @@ public class ChessBoard {
         return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
+    public void removePiece(ChessPosition position) {
+        squares[position.getRow() - 1][position.getColumn() - 1] = null;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
@@ -100,12 +104,12 @@ public class ChessBoard {
     @Override
     public String toString() {
         StringBuilder boardString = new StringBuilder();
-        for(int i = 0; i < 7; i++) {
-            for(int j = 0; j < 7; j++) {
+        for(int i = 0; i < 8; i++) {
+            for(int j = 0; j < 8; j++) {
                 if (squares[i][j] != null) {
                     boardString.append(squares[i][j].toString());
                 } else {
-                    boardString.append(" x ");
+                    boardString.append("x");
                 }
             }
             boardString.append(" \n");
@@ -113,3 +117,5 @@ public class ChessBoard {
         return boardString.toString();
     }
 }
+
+
