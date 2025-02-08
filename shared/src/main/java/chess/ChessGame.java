@@ -77,10 +77,12 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         if(teamColor == TeamColor.WHITE) {
-            return isWhiteInCheck();
+            ChessPosition whiteKingPos = getKingPosition(WHITE);
+            return isWhiteInCheck(whiteKingPos);
         }
         if(teamColor == TeamColor.BLACK) {
-            return isBlackInCheck();
+            ChessPosition blackKingPos = getKingPosition(BLACK);
+            return isBlackInCheck(blackKingPos);
         }
         return false;
     }
@@ -92,7 +94,23 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return false;
+        TeamColor opposingColor;
+        if(teamColor == WHITE) {
+            opposingColor = BLACK;
+        } else {
+            opposingColor = WHITE;
+        }
+        if(isInCheck(teamColor)) {
+            ChessPosition kingPos = getKingPosition(teamColor);
+            ChessPiece king = getBoard().getPiece(kingPos);
+            ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) king.pieceMoves(getBoard(), kingPos);
+            for(ChessMove move : kingMoves) {
+                if(!isInCheck(move.getEndPosition(), opposingColor)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -139,14 +157,12 @@ public class ChessGame {
         return new ChessPosition(1, 1);
     }
 
-    private boolean isWhiteInCheck() {
-        ChessPosition whiteKingPos = getKingPosition(WHITE);
-        return isInCheck(whiteKingPos, BLACK);
+    private boolean isWhiteInCheck(ChessPosition kingPosition) {
+        return isInCheck(kingPosition, BLACK);
     }
 
-    private boolean isBlackInCheck() {
-        ChessPosition blackKingPos = getKingPosition(BLACK);
-        return isInCheck(blackKingPos, WHITE);
+    private boolean isBlackInCheck(ChessPosition kingPosition) {
+        return isInCheck(kingPosition, WHITE);
     }
 
     private boolean isInCheck(ChessPosition kingPosition, TeamColor opposingColor) {

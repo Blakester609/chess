@@ -33,7 +33,6 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
         ArrayList<ChessMove> diagonalMoves = new ArrayList<>();
         while ((rowPos < 8) &&  (colPos < 8)){
             ChessPosition newPos = new ChessPosition(rowPos += 1, colPos += 1);
-            System.out.println(newPos);
             if(isStuck(board, rowPos, colPos, pieceColor)) {
                 break;
             }
@@ -46,7 +45,6 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
         rowPos = position.getRow();
         colPos = position.getColumn();
         while ((rowPos > 1) &&  (colPos < 8)){
-            System.out.println("Row: " + rowPos + " Column: " + colPos);
             ChessPosition newPos = new ChessPosition(rowPos -= 1, colPos += 1);
             if(isStuck(board, rowPos, colPos, pieceColor)) {
                 break;
