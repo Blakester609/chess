@@ -6,6 +6,7 @@ import java.util.Collection;
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
 import static chess.ChessPiece.PieceType.KING;
+import static chess.ChessPiece.PieceType.PAWN;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -94,6 +95,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        boolean isInCheckmate = true;
         TeamColor opposingColor;
         if(teamColor == WHITE) {
             opposingColor = BLACK;
@@ -102,15 +104,21 @@ public class ChessGame {
         }
         if(isInCheck(teamColor)) {
             ChessPosition kingPos = getKingPosition(teamColor);
+            System.out.println(kingPos);
             ChessPiece king = getBoard().getPiece(kingPos);
             ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) king.pieceMoves(getBoard(), kingPos);
             for(ChessMove move : kingMoves) {
                 if(!isInCheck(move.getEndPosition(), opposingColor)) {
-                    return false;
+                    System.out.print("Not in check: ");
+                    System.out.println(move);
+                    isInCheckmate = false;
                 }
             }
         }
-        return true;
+        if(teamColor != getTeamTurn()) {
+            isInCheckmate = false;
+        }
+        return isInCheckmate;
     }
 
     /**
@@ -173,17 +181,40 @@ public class ChessGame {
                     ChessPiece piece = getBoard().getPiece(pos);
                     if(piece.getTeamColor() == opposingColor) {
                         ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) piece.pieceMoves(getBoard(), pos);
+                        if(piece.getPieceType() == PAWN) {
+                            boolean couldCheck = isCouldCheck(kingPosition, opposingColor, pos);
+                            System.out.print("Pawn could check: ");
+                            System.out.println(couldCheck);
+                            if(couldCheck) {
+                                return couldCheck;
+                            }
+                        }
                         for(ChessMove move: thisPieceMoves) {
                             if(kingPosition.equals(move.getEndPosition())) {
+                                System.out.println(piece);
+                                System.out.println(move);
                                 return true;
                             }
                         }
+
                     }
 
                 }
             }
         }
         return false;
+    }
+
+    private static boolean isCouldCheck(ChessPosition kingPosition, TeamColor opposingColor, ChessPosition pos) {
+        boolean couldCheck = false;
+        if(opposingColor == BLACK) {
+            couldCheck = kingPosition.equals(new ChessPosition(pos.getRow() - 1, pos.getColumn() + 1)) ||
+                    kingPosition.equals(new ChessPosition(pos.getRow() - 1, pos.getColumn() - 1));
+        } else if(opposingColor == WHITE) {
+            couldCheck = kingPosition.equals(new ChessPosition(pos.getRow() + 1, pos.getColumn() + 1)) ||
+                    kingPosition.equals(new ChessPosition(pos.getRow() + 1, pos.getColumn() - 1));
+        }
+        return couldCheck;
     }
 
 }
