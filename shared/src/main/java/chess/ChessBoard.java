@@ -1,12 +1,10 @@
 package chess;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
+import static chess.ChessPiece.PieceType.KING;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
@@ -16,8 +14,7 @@ import static chess.ChessGame.TeamColor.WHITE;
  */
 public class ChessBoard {
     private ChessPiece[][] squares = new ChessPiece[8][8];
-    private Set<ChessPiece> whitePieces = new HashSet<>();
-    private Set<ChessPiece> blackPieces = new HashSet<>();
+
     public ChessBoard() {
         resetBoard();
     }
@@ -30,11 +27,6 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
-        if (piece.getTeamColor() == WHITE) {
-            whitePieces.add(piece);
-        } else if(piece.getTeamColor() == BLACK) {
-            blackPieces.add(piece);
-        }
     }
 
     /**
@@ -59,7 +51,7 @@ public class ChessBoard {
         addPiece(new ChessPosition(1, 3), new ChessPiece(WHITE, ChessPiece.PieceType.BISHOP));
         addPiece(new ChessPosition(1, 4), new ChessPiece(WHITE, ChessPiece.PieceType.QUEEN));
         addPiece(new ChessPosition(1, 6), new ChessPiece(WHITE, ChessPiece.PieceType.BISHOP));
-        addPiece(new ChessPosition(1, 5), new ChessPiece(WHITE, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(1, 5), new ChessPiece(WHITE, KING));
         addPiece(new ChessPosition(1, 7), new ChessPiece(WHITE, ChessPiece.PieceType.KNIGHT));
         addPiece(new ChessPosition(1, 8), new ChessPiece(WHITE, ChessPiece.PieceType.ROOK));
         for(int i = 1; i <= 8; i++) {
@@ -71,7 +63,7 @@ public class ChessBoard {
         addPiece(new ChessPosition(8, 2), new ChessPiece(BLACK, ChessPiece.PieceType.KNIGHT));
         addPiece(new ChessPosition(8, 3), new ChessPiece(BLACK, ChessPiece.PieceType.BISHOP));
         addPiece(new ChessPosition(8, 4), new ChessPiece(BLACK, ChessPiece.PieceType.QUEEN));
-        addPiece(new ChessPosition(8, 5), new ChessPiece(BLACK, ChessPiece.PieceType.KING));
+        addPiece(new ChessPosition(8, 5), new ChessPiece(BLACK, KING));
         addPiece(new ChessPosition(8, 6), new ChessPiece(BLACK, ChessPiece.PieceType.BISHOP));
         addPiece(new ChessPosition(8, 7), new ChessPiece(BLACK, ChessPiece.PieceType.KNIGHT));
         addPiece(new ChessPosition(8, 8), new ChessPiece(BLACK, ChessPiece.PieceType.ROOK));
@@ -81,11 +73,47 @@ public class ChessBoard {
     }
 
     public boolean isWhiteInCheck() {
+        ChessPosition whiteKingPos = getKingPosition(WHITE);
+        for(int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                if(this.getPiece(pos) != null) {
+                    ChessPiece piece = this.getPiece(pos);
+                    if(piece.getTeamColor() == BLACK) {
+                        ArrayList<ChessMove> thisPieceMoves = (ArrayList<ChessMove>) piece.pieceMoves(this, pos);
+                        for(ChessMove move: thisPieceMoves) {
+                            if(whiteKingPos == move.getEndPosition()) {
+                                return true;
+                            }
+                        }
+                    }
 
+                }
+            }
+        }
+        return false;
+    }
+
+
+
+
+    private ChessPosition getKingPosition(ChessGame.TeamColor color ) {
+        for(int i = 1; i < 9; i++) {
+            for(int j = 1; j < 9; j++) {
+                ChessPosition pos = new ChessPosition(i, j);
+                if(this.getPiece(pos) != null) {
+                    ChessPiece piece = this.getPiece(pos);
+                    if(piece.getPieceType() == KING && piece.getTeamColor() == color) {
+                        return pos;
+                    }
+                }
+            }
+        }
+        return new ChessPosition(1, 1);
     }
 
     public boolean isBlackInCheck() {
-
+        return false;
     }
 
     @Override
