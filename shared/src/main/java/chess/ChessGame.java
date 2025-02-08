@@ -169,7 +169,7 @@ public class ChessGame {
             ChessPosition kingPos = getKingPosition(teamColor);
             System.out.println(kingPos);
             ChessPiece king = getBoard().getPiece(kingPos);
-            ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) king.pieceMoves(getBoard(), kingPos);
+            ArrayList<ChessMove> kingMoves = (ArrayList<ChessMove>) validMoves(kingPos);
             for(ChessMove move : kingMoves) {
                 if(!isInCheck(move.getEndPosition(), opposingColor)) {
                     System.out.print("Not in check: ");
