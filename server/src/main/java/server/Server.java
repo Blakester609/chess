@@ -1,8 +1,16 @@
 package server;
 
+
+import service.UserService;
 import spark.*;
 
 public class Server {
+    private final UserService userService;
+
+    public Server(UserService userService) {
+        this.userService = userService;
+    }
+
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -21,5 +29,10 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    private Object loginHandler(Request req, Response res) {
+
+        return null;
     }
 }
