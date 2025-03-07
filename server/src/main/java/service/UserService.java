@@ -26,7 +26,8 @@ public class UserService {
        return authDao.createAuth(userData.username());
     }
 
-    public void logout(AuthData logoutRequest) {
-
+    public AuthData logout(AuthData logoutRequest) throws DataAccessException {
+        AuthData authData = authDao.getAuth(logoutRequest);
+        return authDao.deleteAuth(authData);
     }
 }

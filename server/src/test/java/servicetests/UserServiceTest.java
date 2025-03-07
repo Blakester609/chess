@@ -1,8 +1,6 @@
 package servicetests;
 
-import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,10 +10,13 @@ import service.UserService;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
-    static final UserService service = new UserService(new MemoryUserDAO(), new MemoryAuthDAO());
+    static UserDAO userDao = new MemoryUserDAO();
+    static AuthDAO authDao = new MemoryAuthDAO();
+    static final UserService service = new UserService(userDao, authDao);
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataAccessException {
+
     }
 
     @Test
@@ -24,6 +25,18 @@ class UserServiceTest {
         AuthData expected = service.register(newUser);
         assertEquals(expected.username(), newUser.username());
     }
+
+    @Test
+    void testRegisterUserAlreadyTaken() throws DataAccessException {
+        UserData user1 = new UserData("Blake", "cheese", "five@gmail.com");
+        UserData user2 = new UserData("Joshua", "banana", "pink@yahoo.com");
+        AuthData expected = service.register(user1);
+        expected = service.register(user2);
+        assertThrows(DataAccessException.class, ()
+                -> service.register(user2)
+        );
+    }
+
 
 
 

@@ -46,6 +46,9 @@ public class MemoryUserDAO implements UserDAO {
             if(e.StatusCode() == 401) {
                 throw new DataAccessException("Error: bad request", 400);
             }
+            if(e.StatusCode() == 403) {
+                throw e;
+            }
             this.userDataList.add(userData);
             return userData;
         }
@@ -54,8 +57,11 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public String toString() {
-        return "MemoryUserDAO{" +
-                "userDataList=" + userDataList +
-                '}';
+        StringBuilder daoString = new StringBuilder();
+        for(UserData userDataString : userDataList) {
+            daoString.append(userDataString.toString());
+            daoString.append("\n");
+        }
+        return daoString.toString();
     }
 }
