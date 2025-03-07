@@ -1,14 +1,19 @@
 package server;
 
 
+import com.google.gson.Gson;
+import dataaccess.DataAccessException;
+import model.AuthData;
+import model.UserData;
 import service.UserService;
 import spark.*;
+import java.lang.Exception;
 
 public class Server {
-    private final UserService userService;
+    private UserService userService;
 
-    public Server(UserService userService) {
-        this.userService = userService;
+    public Server() {
+
     }
 
 
@@ -18,12 +23,18 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
-
-        //This line initializes the server and can be removed once you have a functioning endpoint 
+        Spark.post("/session", this::loginHandler);
+        Spark.post("/user", this::registerHandler);
+        Spark.exception(DataAccessException.class, this::exceptionHandler);
+        //This line initializes the server and can be removed once you have a functioning endpoint
         Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();
+    }
+
+    public void setService(UserService userService) {
+        this.userService = userService;
     }
 
     public void stop() {
@@ -31,8 +42,20 @@ public class Server {
         Spark.awaitStop();
     }
 
-    private Object loginHandler(Request req, Response res) {
+    private void exceptionHandler(DataAccessException ex, Request req, Response res) {
+        res.status(ex.StatusCode());
+        res.body(ex.toJson());
+    }
 
-        return null;
+    private Object loginHandler(Request req, Response res) throws DataAccessException {
+        UserData user = new Gson().fromJson(req.body(), UserData.class);
+        AuthData auth = userService.login(user);
+        return new Gson().toJson(auth);
+    }
+
+    private Object registerHandler(Request req, Response res) throws DataAccessException {
+        UserData user = new Gson().fromJson(req.body(), UserData.class);
+        AuthData auth = userService.register(user);
+        return new Gson().toJson(auth);
     }
 }

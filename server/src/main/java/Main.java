@@ -1,4 +1,6 @@
 import chess.*;
+import dataaccess.AuthDAO;
+import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.UserDAO;
 import server.Server;
@@ -11,10 +13,12 @@ public class Main {
         try {
 
             UserDAO userDao = new MemoryUserDAO();
-            UserService userService = new UserService(userDao);
-            Server chessServer = new Server(userService);
+            AuthDAO authDao = new MemoryAuthDAO();
+            UserService userService = new UserService(userDao, authDao);
+            Server chessServer = new Server();
+            chessServer.setService(userService);
             chessServer.run(8080);
-            chessServer.stop();
+//            chessServer.stop();
         } catch (Throwable ex) {
             System.out.printf("Unable to start server %s", ex.getMessage());
         }

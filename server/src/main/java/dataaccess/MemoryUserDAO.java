@@ -3,7 +3,6 @@ package dataaccess;
 import model.UserData;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 public class MemoryUserDAO implements UserDAO {
     private final ArrayList<UserData> userDataList = new ArrayList<>();
@@ -19,21 +18,40 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username, String password) throws DataAccessException {
         for (UserData temp : this.userDataList) {
             if (temp.username().equals(username)) {
-                return temp;
+                if(temp.password().equals(password)) {
+                    return temp;
+                }
+                throw new DataAccessException("Error: unauthorized", 401);
             }
         }
-        throw new DataAccessException("Error: User not found");
+        throw new DataAccessException("Error: User not found", 500);
     }
 
     @Override
-    public void createUser(UserData userData) throws DataAccessException {
-        if(getUser(userData.username()) == null) {
+    public UserData getUser(String username, String password, String email) throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public UserData createUser(UserData userData) throws DataAccessException {
+        try {
+            UserData user = getUser(userData.username(), userData.password());
+            if(user != null) {
+                throw new DataAccessException("Error: already taken", 403);
+            }
+        } catch (DataAccessException e) {
+            if(e.StatusCode() == 401) {
+                throw new DataAccessException("Error: bad request", 400);
+            }
+            if(e.StatusCode() == 500) {
+                throw e;
+            }
             this.userDataList.add(userData);
-        } else {
-            throw new DataAccessException("Error: Could not create user");
+            return userData;
         }
+        throw new DataAccessException("Error: Could not create user", 500);
     }
 }
