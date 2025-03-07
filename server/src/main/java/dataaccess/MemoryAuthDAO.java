@@ -23,4 +23,11 @@ public class MemoryAuthDAO implements AuthDAO {
     public void deleteAuth(AuthData authData) {
 
     }
+
+    @Override
+    public String toString() {
+        return "MemoryAuthDAO{" +
+                "authDataList=" + authDataList +
+                '}';
+    }
 }

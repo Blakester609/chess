@@ -3,6 +3,7 @@ package servicetests;
 import dataaccess.DataAccessException;
 import dataaccess.MemoryAuthDAO;
 import dataaccess.MemoryUserDAO;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +19,13 @@ class UserServiceTest {
     }
 
     @Test
-    void register() {
+    void register() throws DataAccessException {
+        UserData newUser = new UserData("Johnny", "abcdf", "abc@abc.com");
+        AuthData expected = service.register(newUser);
+        assertEquals(expected.username(), newUser.username());
     }
+
+
 
     @Test
     void login() {

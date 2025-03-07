@@ -46,12 +46,16 @@ public class MemoryUserDAO implements UserDAO {
             if(e.StatusCode() == 401) {
                 throw new DataAccessException("Error: bad request", 400);
             }
-            if(e.StatusCode() == 500) {
-                throw e;
-            }
             this.userDataList.add(userData);
             return userData;
         }
         throw new DataAccessException("Error: Could not create user", 500);
+    }
+
+    @Override
+    public String toString() {
+        return "MemoryUserDAO{" +
+                "userDataList=" + userDataList +
+                '}';
     }
 }
