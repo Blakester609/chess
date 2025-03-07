@@ -30,7 +30,9 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public AuthData deleteAuth(AuthData authData) throws DataAccessException {
-
+        AuthData auth = getAuth(authData);
+        this.authDataList.remove(auth);
+        throw new DataAccessException("Error: could not logout", 500);
     }
 
     @Override
