@@ -33,6 +33,7 @@ public class Server {
         Spark.post("/game", this::createGameHandler);
         Spark.put("/game", this::joinGameHandler);
         Spark.get("/game", this::listGamesHandler);
+        Spark.delete("/db", this::clearDatabaseHandler);
         Spark.exception(DataAccessException.class, this::exceptionHandler);
         //This line initializes the server and can be removed once you have a functioning endpoint
         Spark.init();
@@ -94,6 +95,7 @@ public class Server {
     }
 
     private Object clearDatabaseHandler(Request req, Response res) throws DataAccessException {
-
+        boolean cleared = userService.clear();
+        return new Gson().toJson(Map.of());
     }
 }
