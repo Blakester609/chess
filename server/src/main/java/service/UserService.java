@@ -54,6 +54,9 @@ public class UserService {
     }
 
     public boolean clear() throws DataAccessException {
-
+        authDao.clearAuthData();
+        gameDao.clearAllGameData();
+        userDao.clearAllUserData();
+        return true;
     }
 }
