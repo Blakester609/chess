@@ -60,4 +60,9 @@ class UserServiceTest {
         boolean logout = service.logout(expected.authToken());
         assertTrue(logout);
     }
+
+    @Test
+    void logoutFailure() throws DataAccessException {
+      assertThrows(DataAccessException.class, () -> service.logout("aasdfasdfasfasdfasf"));
+    }
 }
