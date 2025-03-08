@@ -1,4 +1,4 @@
-package servicetests;
+package service;
 
 import chess.ChessGame;
 import dataaccess.*;
@@ -7,8 +7,6 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import service.JoinRequest;
-import service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
