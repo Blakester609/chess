@@ -50,7 +50,7 @@ class UserServiceTest {
 
     @Test
     void loginSuccess() throws DataAccessException {
-        UserData loginUser = new UserData("Jason", "banana", "");
+        UserData loginUser = new UserData("Joshua", "banana", "");
         AuthData expected = service.login(loginUser);
         assertEquals(expected.username(), loginUser.username());
     }
