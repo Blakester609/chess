@@ -31,8 +31,12 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username, String password, String email) throws DataAccessException {
-        return null;
+    public void clearAllUserData() throws DataAccessException {
+        try {
+            userDataList.clear();
+        } catch (Error e) {
+            throw new DataAccessException("Error: could not clear database", 500);
+        }
     }
 
     @Override

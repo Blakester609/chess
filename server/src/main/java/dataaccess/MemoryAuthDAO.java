@@ -35,6 +35,15 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
+    public void clearAuthData() throws DataAccessException {
+        try {
+            authDataList.clear();
+        } catch (Error e) {
+            throw new DataAccessException("Error: could not clear auth data", 500);
+        }
+    }
+
+    @Override
     public String toString() {
         return "MemoryAuthDAO{" +
                 "authDataList=" + authDataList +

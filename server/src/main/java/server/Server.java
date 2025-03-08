@@ -5,9 +5,13 @@ import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
+import model.GameData;
+import service.JoinRequest;
 import service.UserService;
 import spark.*;
 import java.lang.Exception;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
     private UserService userService;
@@ -26,6 +30,9 @@ public class Server {
         Spark.post("/session", this::loginHandler);
         Spark.delete("/session", this::logoutHandler);
         Spark.post("/user", this::registerHandler);
+        Spark.post("/game", this::createGameHandler);
+        Spark.put("/game", this::joinGameHandler);
+        Spark.get("/game", this::listGamesHandler);
         Spark.exception(DataAccessException.class, this::exceptionHandler);
         //This line initializes the server and can be removed once you have a functioning endpoint
         Spark.init();
@@ -63,6 +70,30 @@ public class Server {
     private Object logoutHandler(Request req, Response res) throws DataAccessException {
         String authToken = req.headers("authorization");
         boolean success = userService.logout(authToken);
-        return new Gson().toJson(success);
+        return new Gson().toJson(Map.of());
+    }
+
+    private Object createGameHandler(Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        GameData game = new Gson().fromJson(req.body(), GameData.class);
+        GameData gameData = userService.create(game, authToken);
+        return new Gson().toJson(Map.of("gameID", gameData.gameID()));
+    }
+
+    private Object joinGameHandler(Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        JoinRequest joinData = new Gson().fromJson(req.body(), JoinRequest.class);
+        boolean joinResult = userService.join(joinData, authToken);
+        return new Gson().toJson(joinResult);
+    }
+
+    private Object listGamesHandler(Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        var gamesList = userService.list(authToken).toArray();
+        return new Gson().toJson(Map.of("games", gamesList));
+    }
+
+    private Object clearDatabaseHandler(Request req, Response res) throws DataAccessException {
+
     }
 }

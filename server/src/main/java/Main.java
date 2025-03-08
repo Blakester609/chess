@@ -1,8 +1,5 @@
 import chess.*;
-import dataaccess.AuthDAO;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import server.Server;
 import service.UserService;
 
@@ -14,7 +11,8 @@ public class Main {
 
             UserDAO userDao = new MemoryUserDAO();
             AuthDAO authDao = new MemoryAuthDAO();
-            UserService userService = new UserService(userDao, authDao);
+            GameDAO gameDao = new MemoryGameDAO();
+            UserService userService = new UserService(userDao, authDao, gameDao);
             Server chessServer = new Server();
             chessServer.setService(userService);
             chessServer.run(8080);
