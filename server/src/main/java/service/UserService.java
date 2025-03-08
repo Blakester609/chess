@@ -45,12 +45,16 @@ public class UserService {
     public boolean join(JoinRequest joinRequest, String authToken) throws DataAccessException {
         AuthData authData = authDao.getAuth(authToken);
         GameData gameData = gameDao.getGame(joinRequest.gameID());
-        return gameDao.updateGame(joinRequest.playerColor(), gameData.gameID(), authData.username());
+        return gameDao.updateGame(String.valueOf(joinRequest.playerColor()), gameData.gameID(), authData.username());
     }
 
-    public ArrayList<GameData> list(String authToken) throws DataAccessException {
+    public ArrayList<ListResult> list(String authToken) throws DataAccessException {
+        ArrayList<ListResult> listResult = new ArrayList<>();
         AuthData authData = authDao.getAuth(authToken);
-        return gameDao.listGames();
+        for(GameData game : gameDao.listGames()) {
+            listResult.add(new ListResult(game.gameID(), game.getWhiteUsername(), game.getBlackUsername(), game.gameName()));
+        }
+        return listResult;
     }
 
     public boolean clear() throws DataAccessException {

@@ -16,7 +16,7 @@ public class MemoryGameDAO implements GameDAO {
                 throw new DataAccessException("Error: bad request", 400);
             }
         }
-        GameData newGame = new GameData(gameDataList.size() + 1, "", "", gameData.gameName(), new ChessGame());
+        GameData newGame = new GameData(gameDataList.size() + 1, null, null, gameData.gameName(), new ChessGame());
         gameDataList.add(newGame);
         return newGame;
     }
@@ -42,7 +42,7 @@ public class MemoryGameDAO implements GameDAO {
                 return game;
             }
         }
-        throw new DataAccessException("Error: game not found", 500);
+        throw new DataAccessException("Error: bad request", 400);
     }
 
 
@@ -59,13 +59,13 @@ public class MemoryGameDAO implements GameDAO {
                         }
                         throw new DataAccessException("Error: already taken", 403);
                     case "BLACK":
-                        if(game.getBlackUsername() != null || Objects.equals(game.getBlackUsername(), "")) {
+                        if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")) {
                             game.setBlackUsername(username);
                             return true;
                         }
                         throw new DataAccessException("Error: already taken", 403);
                     default:
-                        throw new DataAccessException("Error: Must choose BLACK or WHITE", 500);
+                        throw new DataAccessException("Error: bad request", 400);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package servicetests;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -25,7 +26,7 @@ class UserServiceTest {
         AuthData expected = service.register(user2);
         GameData game = service.create(new GameData(0, null, null, "Bob-Game", null), expected.authToken());
         GameData otherGame = service.create(new GameData(2, "", null, "Blake-Game", null), other.authToken());
-        boolean joinBool = service.join(new JoinRequest("WHITE", 2), other.authToken());
+        boolean joinBool = service.join(new JoinRequest(ChessGame.TeamColor.WHITE, 2), other.authToken());
     }
 
     @Test
@@ -91,14 +92,14 @@ class UserServiceTest {
     void testJoinGame() throws DataAccessException {
         UserData loginUser = new UserData("Joshua", "banana", "pink@yahoo.com");
         AuthData expected = service.login(loginUser);
-        assertTrue(service.join(new JoinRequest("WHITE", 1), expected.authToken()));
+        assertTrue(service.join(new JoinRequest(ChessGame.TeamColor.WHITE, 1), expected.authToken()));
     }
 
     @Test
     void testJoinFail() throws DataAccessException {
         UserData loginUser = new UserData("Joshua", "banana", "pink@yahoo.com");
         AuthData expected = service.login(loginUser);
-        assertThrows(DataAccessException.class, () -> service.join(new JoinRequest("WHITE", 2), expected.authToken()));
+        assertThrows(DataAccessException.class, () -> service.join(new JoinRequest(ChessGame.TeamColor.WHITE, 2), expected.authToken()));
     }
 
     @Test
@@ -110,7 +111,18 @@ class UserServiceTest {
     }
 
     @Test
-    void testListGames2() throws DataAccessException {
+    void testListGames2() {
         assertThrows(DataAccessException.class, () -> service.list("asdfasfasdf"));
+    }
+
+    @Test
+    void testClear() throws DataAccessException {
+        assertTrue(service.clear());
+    }
+
+    @Test
+    void testClear2() throws DataAccessException {
+        service.clear();
+        assertThrows(DataAccessException.class, () -> userDao.getUser("Joshua", "banana"));
     }
 }

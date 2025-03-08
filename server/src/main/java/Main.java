@@ -9,12 +9,7 @@ public class Main {
         System.out.println("♕ 240 Chess Server: " + piece);
         try {
 
-            UserDAO userDao = new MemoryUserDAO();
-            AuthDAO authDao = new MemoryAuthDAO();
-            GameDAO gameDao = new MemoryGameDAO();
-            UserService userService = new UserService(userDao, authDao, gameDao);
             Server chessServer = new Server();
-            chessServer.setService(userService);
             chessServer.run(8080);
 //            chessServer.stop();
         } catch (Throwable ex) {

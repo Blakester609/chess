@@ -2,7 +2,7 @@ package server;
 
 
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 import model.GameData;
@@ -16,8 +16,12 @@ import java.util.Map;
 public class Server {
     private UserService userService;
 
-    public Server() {
 
+    public Server() {
+        UserDAO userDao = new MemoryUserDAO();
+        AuthDAO authDao = new MemoryAuthDAO();
+        GameDAO gameDao = new MemoryGameDAO();
+        userService = new UserService(userDao, authDao, gameDao);
     }
 
 
@@ -36,7 +40,7 @@ public class Server {
         Spark.delete("/db", this::clearDatabaseHandler);
         Spark.exception(DataAccessException.class, this::exceptionHandler);
         //This line initializes the server and can be removed once you have a functioning endpoint
-        Spark.init();
+//        Spark.init();
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -85,7 +89,7 @@ public class Server {
         String authToken = req.headers("authorization");
         JoinRequest joinData = new Gson().fromJson(req.body(), JoinRequest.class);
         boolean joinResult = userService.join(joinData, authToken);
-        return new Gson().toJson(joinResult);
+        return new Gson().toJson(Map.of());
     }
 
     private Object listGamesHandler(Request req, Response res) throws DataAccessException {

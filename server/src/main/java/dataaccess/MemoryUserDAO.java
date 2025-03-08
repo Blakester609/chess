@@ -12,22 +12,19 @@ public class MemoryUserDAO implements UserDAO {
     }
 
 
-
-    private void removeUserData(UserData o) {
-        this.userDataList.remove(o);
-    }
-
     @Override
     public UserData getUser(String username, String password) throws DataAccessException {
+        if((username == null || username.isEmpty()) || (password == null || password.isEmpty())) {
+            throw new DataAccessException("Error: bad request", 400);
+        }
         for (UserData temp : this.userDataList) {
             if (temp.username().equals(username)) {
                 if(temp.password().equals(password)) {
                     return temp;
                 }
-                throw new DataAccessException("Error: unauthorized", 401);
             }
         }
-        throw new DataAccessException("Error: User not found", 500);
+        throw new DataAccessException("Error: unauthorized", 401);
     }
 
     @Override
@@ -48,13 +45,15 @@ public class MemoryUserDAO implements UserDAO {
             }
         } catch (DataAccessException e) {
             if(e.StatusCode() == 401) {
-                throw new DataAccessException("Error: bad request", 400);
+                this.userDataList.add(userData);
+                return userData;
             }
             if(e.StatusCode() == 403) {
                 throw e;
             }
-            this.userDataList.add(userData);
-            return userData;
+            if(e.StatusCode() == 400) {
+                throw e;
+            }
         }
         throw new DataAccessException("Error: Could not create user", 500);
     }
