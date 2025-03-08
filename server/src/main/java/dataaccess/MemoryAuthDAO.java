@@ -15,24 +15,23 @@ public class MemoryAuthDAO implements AuthDAO {
     }
 
     @Override
-    public AuthData getAuth(AuthData auth) throws DataAccessException {
+    public AuthData getAuth(String authToken) throws DataAccessException {
         for(AuthData temp : this.authDataList) {
-            if(temp.username().equals(auth.username())) {
-                if(temp.authToken().equals(auth.authToken())) {
-                    return temp;
-                }
+            if(temp.authToken().equals(authToken)) {
+                return temp;
             }
-            throw new DataAccessException("Error: unauthorized", 401);
         }
-        throw new DataAccessException("Error: could not logout", 500);
+        throw new DataAccessException("Error: unauthorized", 401);
     }
 
 
     @Override
-    public AuthData deleteAuth(AuthData authData) throws DataAccessException {
-        AuthData auth = getAuth(authData);
-        this.authDataList.remove(auth);
-        throw new DataAccessException("Error: could not logout", 500);
+    public boolean deleteAuth(AuthData authData) throws DataAccessException {
+        try {
+            return this.authDataList.remove(authData);
+        } catch (Error e) {
+            throw new DataAccessException("Error: could not logout", 500);
+        }
     }
 
     @Override

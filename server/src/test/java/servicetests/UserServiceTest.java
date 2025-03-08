@@ -16,7 +16,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() throws DataAccessException {
-
+        UserData user1 = new UserData("Blake", "cheese", "five@gmail.com");
+        UserData user2 = new UserData("Joshua", "banana", "pink@yahoo.com");
+        AuthData expected = service.register(user1);
+        expected = service.register(user2);
     }
 
     @Test
@@ -28,10 +31,7 @@ class UserServiceTest {
 
     @Test
     void testRegisterUserAlreadyTaken() throws DataAccessException {
-        UserData user1 = new UserData("Blake", "cheese", "five@gmail.com");
         UserData user2 = new UserData("Joshua", "banana", "pink@yahoo.com");
-        AuthData expected = service.register(user1);
-        expected = service.register(user2);
         assertThrows(DataAccessException.class, ()
                 -> service.register(user2)
         );
@@ -47,6 +47,17 @@ class UserServiceTest {
     }
 
     @Test
-    void logout() {
+    void loginSuccess() throws DataAccessException {
+        UserData loginUser = new UserData("Jason", "banana", "");
+        AuthData expected = service.login(loginUser);
+        assertEquals(expected.username(), loginUser.username());
+    }
+
+    @Test
+    void logout() throws DataAccessException {
+        UserData loginUser = new UserData("Jason", "pineapple", "seven@yahoo.com");
+        AuthData expected = service.register(loginUser);
+        boolean logout = service.logout(expected.authToken());
+        assertTrue(logout);
     }
 }
