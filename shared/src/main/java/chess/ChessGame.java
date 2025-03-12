@@ -79,7 +79,8 @@ public class ChessGame {
     }
 
 
-    private boolean isValidMove(ChessPiece piece, ChessPosition kingPosition, ChessPosition startPosition, ChessMove possibleMove, TeamColor chessTeam) {
+    private boolean isValidMove(ChessPiece piece, ChessPosition kingPosition, ChessPosition
+            startPosition, ChessMove possibleMove, TeamColor chessTeam) {
         ChessPosition tempPosition = null;
         ChessPiece tempPiece = null;
 
