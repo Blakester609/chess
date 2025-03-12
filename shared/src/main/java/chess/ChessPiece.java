@@ -123,7 +123,7 @@ public class ChessPiece {
         for (int[] possibleMove : possibleMoves) {
             int newRow = position.getRow() + possibleMove[0];
             int newCol = position.getColumn() + possibleMove[1];
-            if(isStuckEdge(board, newRow, newCol, pieceColor)) {
+            if(isStuck(board, newRow, newCol, pieceColor)) {
                 continue;
             }
             if (((newRow <= 8) && (newRow >= 1)) && ((newCol <= 8) && (newCol >= 1))) {
@@ -136,10 +136,4 @@ public class ChessPiece {
         return validMoves;
     }
 
-    public static boolean isStuckEdge(ChessBoard board, int newRow, int newCol, ChessGame.TeamColor pieceColor) {
-        if ((newCol <= 8 && newCol >= 1) && (newRow <= 8 && newRow >= 1) && board.getPiece(new ChessPosition(newRow, newCol)) != null) {
-            return board.getPiece(new ChessPosition(newRow, newCol)).getTeamColor() == pieceColor;
-        }
-        return false;
-    }
 }
