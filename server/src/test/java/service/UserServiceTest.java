@@ -5,6 +5,7 @@ import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,11 @@ class UserServiceTest {
         GameData game = service.create(new GameData(0, null, null, "Bob-Game", null), expected.authToken());
         GameData otherGame = service.create(new GameData(2, "", null, "Blake-Game", null), other.authToken());
         boolean joinBool = service.join(new JoinRequest(ChessGame.TeamColor.WHITE, 2), other.authToken());
+    }
+
+    @AfterEach
+    void clearAfter() throws DataAccessException {
+        service.clear();
     }
 
     @Test
