@@ -29,7 +29,8 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
         return validMoves;
     }
 
-    public static ArrayList<ChessMove> getDiagonalMoves(int rowPos, int colPos, ChessBoard board, ChessPosition position, ChessGame.TeamColor pieceColor) {
+    public static ArrayList<ChessMove> getDiagonalMoves(int rowPos, int colPos, ChessBoard board,
+                                                        ChessPosition position, ChessGame.TeamColor pieceColor) {
         ArrayList<ChessMove> diagonalMoves = new ArrayList<>();
         while ((rowPos < 8) &&  (colPos < 8)){
             ChessPosition newPos = new ChessPosition(rowPos += 1, colPos += 1);

@@ -28,7 +28,8 @@ public class RookMovesCalculator implements PieceMovesCalculator {
         return validMoves;
     }
 
-    public static ArrayList<ChessMove> getHorizontalMoves(int rowPos, int colPos, ChessBoard board, ChessPosition position, ChessGame.TeamColor pieceColor) {
+    public static ArrayList<ChessMove> getHorizontalMoves(int rowPos, int colPos, ChessBoard board,
+                                                          ChessPosition position, ChessGame.TeamColor pieceColor) {
         ArrayList<ChessMove> horizontalMoves = new ArrayList<>();
         while(colPos < 8) {
             ChessPosition newPos = new ChessPosition(rowPos, colPos += 1);

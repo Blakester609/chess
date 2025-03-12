@@ -118,7 +118,8 @@ public class ChessPiece {
         return false;
     }
 
-    public static ArrayList<ChessMove> addMovesFromList(ChessBoard board, ChessPosition position, ChessGame.TeamColor pieceColor, int[][] possibleMoves) {
+    public static ArrayList<ChessMove> addMovesFromList(ChessBoard board, ChessPosition position,
+                                                        ChessGame.TeamColor pieceColor, int[][] possibleMoves) {
         ArrayList<ChessMove> validMoves = new ArrayList<>();
         for (int[] possibleMove : possibleMoves) {
             int newRow = position.getRow() + possibleMove[0];
