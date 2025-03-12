@@ -18,7 +18,7 @@ public class DataAccessException extends Exception{
         return new Gson().toJson(Map.of("message", getMessage()));
     }
 
-    public int StatusCode() {
+    public int statusCode() {
         return statusCode;
     }
 }

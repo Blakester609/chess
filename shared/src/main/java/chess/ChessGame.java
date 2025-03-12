@@ -69,10 +69,7 @@ public class ChessGame {
             chessTeam = BLACK;
         }
 
-//        System.out.println(kingPos);
-//        System.out.println(getTeamTurn());
         ArrayList<ChessMove> validMoves = new ArrayList<>();
-//        System.out.println(getBoard());
         for(ChessMove pieceMove : pieceToMove.pieceMoves(getBoard(), startPosition)) {
             if(isValidMove(pieceToMove, kingPos, startPosition, pieceMove, chessTeam)) {
                 validMoves.add(pieceMove);
@@ -163,7 +160,6 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-//        boolean isInCheckmate = false;
         TeamColor opposingColor;
         if(teamColor == WHITE) {
             opposingColor = BLACK;
@@ -265,11 +261,6 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-//        if(getBoard() != null) {
-//            this.gameBoard.clearBoard();
-//            System.out.println("New Board " + this.gameBoard);
-//        }
-
         this.gameBoard = board;
     }
 

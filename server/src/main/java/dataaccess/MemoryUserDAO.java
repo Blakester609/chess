@@ -44,14 +44,14 @@ public class MemoryUserDAO implements UserDAO {
                 throw new DataAccessException("Error: already taken", 403);
             }
         } catch (DataAccessException e) {
-            if(e.StatusCode() == 401) {
+            if(e.statusCode() == 401) {
                 this.userDataList.add(userData);
                 return userData;
             }
-            if(e.StatusCode() == 403) {
+            if(e.statusCode() == 403) {
                 throw e;
             }
-            if(e.StatusCode() == 400) {
+            if(e.statusCode() == 400) {
                 throw e;
             }
         }

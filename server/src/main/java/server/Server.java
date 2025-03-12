@@ -9,8 +9,7 @@ import model.GameData;
 import service.JoinRequest;
 import service.UserService;
 import spark.*;
-import java.lang.Exception;
-import java.util.HashMap;
+
 import java.util.Map;
 
 public class Server {
@@ -56,7 +55,7 @@ public class Server {
     }
 
     private void exceptionHandler(DataAccessException ex, Request req, Response res) {
-        res.status(ex.StatusCode());
+        res.status(ex.statusCode());
         res.body(ex.toJson());
     }
 
