@@ -17,7 +17,7 @@ public class ChessBoard {
 
     public ChessBoard() {
     }
-    
+
 
     /**
      * Adds a chess piece to the chessboard
