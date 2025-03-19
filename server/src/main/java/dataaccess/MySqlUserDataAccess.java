@@ -5,6 +5,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class MySqlUserDataAccess extends MySqlDataAccess implements UserDAO {
     public MySqlUserDataAccess() throws DataAccessException {
+        super();
     }
 
     @Override

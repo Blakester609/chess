@@ -17,9 +17,28 @@ public class Server {
 
 
     public Server() {
-        UserDAO userDao = new MemoryUserDAO();
-        AuthDAO authDao = new MemoryAuthDAO();
-        GameDAO gameDao = new MemoryGameDAO();
+//        UserDAO userDao = new MemoryUserDAO();
+//        AuthDAO authDao = new MemoryAuthDAO();
+//        GameDAO gameDao = new MemoryGameDAO();
+
+        UserDAO userDao = null;
+        try {
+            userDao = new MySqlUserDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        AuthDAO authDao = null;
+        try {
+            authDao = new MySqlAuthDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+        GameDAO gameDao = null;
+        try {
+            gameDao = new MySqlGameDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
         userService = new UserService(userDao, authDao, gameDao);
     }
 

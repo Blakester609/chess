@@ -42,11 +42,9 @@ public class MySqlAuthDataAccess extends MySqlDataAccess implements AuthDAO {
 
     @Override
     public boolean deleteAuth(AuthData authData) throws DataAccessException {
+        AuthData auth = getAuth(authData.authToken());
         var statement = "DELETE FROM Auth WHERE authToken=?";
-        if(executeUpdate(statement, authData.authToken()) == 0) {
-            throw new DataAccessException("Error: unauthorized", 401);
-        }
-        return false;
+        return executeUpdate(statement, auth.authToken()) != 0;
     }
 
     @Override

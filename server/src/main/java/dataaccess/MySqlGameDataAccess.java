@@ -39,9 +39,9 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
                 }
             }
         } catch (Exception e) {
-            throw new DataAccessException("Error: unauthorized", 401);
+            throw new DataAccessException("Error: bad request", 400);
         }
-        throw new DataAccessException("Error: unauthorized", 401);
+        throw new DataAccessException("Error: bad request", 400);
     }
 
     @Override

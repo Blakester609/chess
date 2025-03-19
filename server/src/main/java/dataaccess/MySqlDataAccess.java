@@ -74,7 +74,7 @@ public class MySqlDataAccess {
             CREATE TABLE IF NOT EXISTS Auth (
                 `authToken` varchar(256) NOT NULL,
                 `username` varchar(256) NOT NULL,
-                PRIMARY KEY (`username`)
+                PRIMARY KEY (`authToken`)
             )
             """
     };
