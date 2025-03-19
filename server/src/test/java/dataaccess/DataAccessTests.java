@@ -1,6 +1,8 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,6 +45,35 @@ public class DataAccessTests {
         return db;
     }
 
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testCreateGame(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        assertDoesNotThrow(() -> dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame())));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testCreateGameFail(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame()));
+        assertThrows(DataAccessException.class, () -> dataAccess.createGame(new GameData(0, "", "", null, null)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testGetGame(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame()));
+        assertDoesNotThrow(() -> dataAccess.getGame(1));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testGetGameFail(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        assertThrows(DataAccessException.class, () -> dataAccess.getGame(3));
+    }
 
     @ParameterizedTest
     @ValueSource(classes = {MySqlAuthDataAccess.class, MemoryAuthDAO.class})

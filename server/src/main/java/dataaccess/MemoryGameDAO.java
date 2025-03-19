@@ -11,6 +11,9 @@ public class MemoryGameDAO implements GameDAO {
 
     @Override
     public GameData createGame(GameData gameData) throws DataAccessException {
+        if(gameData.gameName() == null) {
+            throw new DataAccessException("Error: bad request", 400);
+        }
         for(GameData game : gameDataList) {
             if(game.gameName().equals(gameData.gameName())) {
                 throw new DataAccessException("Error: bad request", 400);

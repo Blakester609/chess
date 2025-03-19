@@ -1,6 +1,9 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.GameData;
+import model.UserData;
 
 import java.util.ArrayList;
 
@@ -10,18 +13,40 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
 
     @Override
     public GameData createGame(GameData gameData) throws DataAccessException {
-        var statement = "INSERT INTO Game (authToken, username) VALUES (?, ?)";
-
-        return null;
+        var statement = "INSERT INTO Game (whiteUsername, blackUsername, gameName, json) VALUES (?, ?, ?, ?)";
+        var json = new Gson().toJson(gameData.getGame());
+        System.out.println(json);
+        var id = executeUpdate(statement, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), json);
+        return new GameData(id, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), gameData.getGame());
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
-        return null;
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, whiteUsername, blackUsername, gameName, json FROM Game WHERE id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        var realId = rs.getInt("id");
+                        var realWhiteUsername = rs.getString("whiteUsername");
+                        var realBlackUsername = rs.getString("blackUsername");
+                        var realGameName = rs.getString("gameName");
+                        var realJson = rs.getString("json");
+                        var jsonString = new Gson().fromJson(realJson, ChessGame.class);
+                        return new GameData(realId, realWhiteUsername, realBlackUsername, realGameName, jsonString);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Error: unauthorized", 401);
+        }
+        throw new DataAccessException("Error: unauthorized", 401);
     }
 
     @Override
     public boolean updateGame(String playerColor, int gameID, String username) throws DataAccessException {
+
         return false;
     }
 
