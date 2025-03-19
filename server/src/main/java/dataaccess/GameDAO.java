@@ -12,7 +12,7 @@ public interface GameDAO {
 
     boolean updateGame(String playerColor, int gameID, String username) throws DataAccessException;
 
-    ArrayList<GameData> listGames();
+    ArrayList<GameData> listGames() throws DataAccessException;
 
     void clearAllGameData() throws DataAccessException;
 }

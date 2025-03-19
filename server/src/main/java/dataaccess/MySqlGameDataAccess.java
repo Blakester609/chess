@@ -6,6 +6,7 @@ import model.GameData;
 import model.UserData;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
     public MySqlGameDataAccess() throws DataAccessException {
@@ -46,13 +47,49 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
 
     @Override
     public boolean updateGame(String playerColor, int gameID, String username) throws DataAccessException {
-
-        return false;
+        GameData game = getGame(gameID);
+        switch (playerColor) {
+            case "WHITE":
+                if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")) {
+                    var statement = "UPDATE Game SET whiteUsername=? WHERE id=?";
+                    executeUpdate(statement, username, gameID);
+                    return true;
+                }
+                throw new DataAccessException("Error: already taken", 403);
+            case "BLACK":
+                if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")) {
+                    var statement = "UPDATE Game SET blackUsername=? WHERE id=?";
+                    executeUpdate(statement, username, gameID);
+                    return true;
+                }
+                throw new DataAccessException("Error: already taken", 403);
+            default:
+                throw new DataAccessException("Error: bad request", 400);
+        }
     }
 
     @Override
-    public ArrayList<GameData> listGames() {
-        return null;
+    public ArrayList<GameData> listGames() throws DataAccessException {
+        var result = new ArrayList<GameData>();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, whiteUsername, blackUsername, gameName, json FROM Game";
+            try (var ps = conn.prepareStatement(statement)) {
+                try (var rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        var realId = rs.getInt("id");
+                        var realWhiteUsername = rs.getString("whiteUsername");
+                        var realBlackUsername = rs.getString("blackUsername");
+                        var realGameName = rs.getString("gameName");
+                        var realJson = rs.getString("json");
+                        var jsonString = new Gson().fromJson(realJson, ChessGame.class);
+                        result.add(new GameData(realId, realWhiteUsername, realBlackUsername, realGameName, jsonString));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Error: unauthorized", 401);
+        }
+        return result;
     }
 
     @Override

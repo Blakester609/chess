@@ -70,6 +70,32 @@ public class DataAccessTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testUpdateGame(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame()));
+        assertDoesNotThrow(() -> dataAccess.updateGame("WHITE", 1, "Samuel"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testUpdateGameFail(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame()));
+        dataAccess.updateGame("WHITE", 1, "Samuel");
+        assertThrows(DataAccessException.class, () -> dataAccess.updateGame("WHITE", 1, "Samuel"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
+    void testListGames(Class<? extends GameDAO> dbClass) throws DataAccessException {
+        GameDAO dataAccess = getGameDataAccess(dbClass);
+        dataAccess.createGame(new GameData(0, "", "", "Josh-Game", new ChessGame()));
+        dataAccess.createGame(new GameData(0, "", "", "Nelly-Game", new ChessGame()));
+        assertDoesNotThrow(dataAccess::listGames);
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlGameDataAccess.class, MemoryGameDAO.class})
     void testGetGameFail(Class<? extends GameDAO> dbClass) throws DataAccessException {
         GameDAO dataAccess = getGameDataAccess(dbClass);
         assertThrows(DataAccessException.class, () -> dataAccess.getGame(3));
