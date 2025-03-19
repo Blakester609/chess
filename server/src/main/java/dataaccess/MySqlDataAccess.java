@@ -2,8 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.sql.*;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
