@@ -17,10 +17,6 @@ public class Server {
 
 
     public Server() {
-//        UserDAO userDao = new MemoryUserDAO();
-//        AuthDAO authDao = new MemoryAuthDAO();
-//        GameDAO gameDao = new MemoryGameDAO();
-
         UserDAO userDao = null;
         try {
             userDao = new MySqlUserDataAccess();
