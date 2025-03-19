@@ -10,6 +10,8 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
 
     @Override
     public GameData createGame(GameData gameData) throws DataAccessException {
+        var statement = "INSERT INTO Game (authToken, username) VALUES (?, ?)";
+
         return null;
     }
 

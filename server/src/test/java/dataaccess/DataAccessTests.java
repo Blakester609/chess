@@ -85,7 +85,13 @@ public class DataAccessTests {
     }
 
 
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlAuthDataAccess.class, MemoryAuthDAO.class})
+    void testDeleteAuthFail(Class<? extends AuthDAO> dbClass) throws DataAccessException {
+        AuthDAO dataAccess = getAuthDataAccess(dbClass);
 
+        assertThrows(DataAccessException.class, () -> dataAccess.deleteAuth(new AuthData("asdfasf", "Bob")));
+    }
 
     @ParameterizedTest
     @ValueSource(classes = {MySqlUserDataAccess.class, MemoryUserDAO.class})
