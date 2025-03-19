@@ -40,6 +40,8 @@ class UserServiceTest {
         assertEquals(expected.username(), newUser.username());
     }
 
+
+
     @Test
     void testRegisterUserAlreadyTaken() throws DataAccessException {
         UserData user2 = new UserData("Joshua", "banana", "pink@yahoo.com");
@@ -128,5 +130,10 @@ class UserServiceTest {
     void testClear2() throws DataAccessException {
         SERVICE.clear();
         assertThrows(DataAccessException.class, () -> userDao.getUser("Joshua", "banana"));
+    }
+
+    @Test
+    void setupDatabase() {
+        assertDoesNotThrow(MySqlDataAccess::new);
     }
 }
