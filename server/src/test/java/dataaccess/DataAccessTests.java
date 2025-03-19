@@ -161,6 +161,26 @@ public class DataAccessTests {
 
     @ParameterizedTest
     @ValueSource(classes = {MySqlUserDataAccess.class, MemoryUserDAO.class})
+    void testGetUser(Class<? extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO dataAccess = getUserDataAccess(dbClass);
+
+        var newUser = new UserData("Blake", "cheese", "five@gmail.com");
+        dataAccess.createUser(newUser);
+        assertDoesNotThrow(() -> dataAccess.getUser("Blake", "cheese"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlUserDataAccess.class, MemoryUserDAO.class})
+    void testGetUserFail(Class<? extends UserDAO> dbClass) throws DataAccessException {
+        UserDAO dataAccess = getUserDataAccess(dbClass);
+
+        var newUser = new UserData("Blake", "cheese", "five@gmail.com");
+        dataAccess.createUser(newUser);
+        assertThrows(DataAccessException.class, () -> dataAccess.getUser("Blake", "asdf"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(classes = {MySqlUserDataAccess.class, MemoryUserDAO.class})
     void addUserFail(Class<? extends UserDAO> dbClass) throws DataAccessException {
         UserDAO dataAccess = getUserDataAccess(dbClass);
 
