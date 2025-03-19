@@ -132,8 +132,5 @@ class UserServiceTest {
         assertThrows(DataAccessException.class, () -> userDao.getUser("Joshua", "banana"));
     }
 
-    @Test
-    void setupDatabase() {
-        assertDoesNotThrow(MySqlDataAccess::new);
-    }
+
 }

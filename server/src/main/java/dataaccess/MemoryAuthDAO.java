@@ -8,7 +8,10 @@ import java.util.UUID;
 public class MemoryAuthDAO implements AuthDAO {
     private final ArrayList<AuthData> authDataList = new ArrayList<>();
     @Override
-    public AuthData createAuth(String username) {
+    public AuthData createAuth(String username) throws DataAccessException {
+        if((username == null) || (username.isEmpty())) {
+            throw new DataAccessException("Error: bad request", 400);
+        }
         AuthData newAuth = new AuthData(UUID.randomUUID().toString(), username);
         authDataList.add(newAuth);
         return newAuth;

@@ -29,7 +29,7 @@ public class MySqlDataAccess {
         }
     }
 
-    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+    protected int executeUpdate(String statement, Object... params) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
                 for (var i = 0; i < params.length; i++) {
@@ -76,8 +76,7 @@ public class MySqlDataAccess {
             CREATE TABLE IF NOT EXISTS Auth (
                 `authToken` varchar(256) NOT NULL,
                 `username` varchar(256) NOT NULL,
-                PRIMARY KEY (`authToken`),
-                FOREIGN KEY(`username`) REFERENCES User(`username`)
+                PRIMARY KEY (`username`)
             )
             """
     };
