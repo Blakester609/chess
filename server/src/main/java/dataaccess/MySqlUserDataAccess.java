@@ -3,6 +3,9 @@ package dataaccess;
 import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 public class MySqlUserDataAccess extends MySqlDataAccess implements UserDAO {
     public MySqlUserDataAccess() throws DataAccessException {
         super();
@@ -20,20 +23,9 @@ public class MySqlUserDataAccess extends MySqlDataAccess implements UserDAO {
                 try (var rs = ps.executeQuery()) {
                     if(rs.next()) {
                         var hashedPassword = rs.getString("password");
-                        if (BCrypt.checkpw(password, hashedPassword)) {
-                            var statement = "SELECT username, password, email FROM User WHERE username=? AND password=?";
-                            try (var ps2 = conn.prepareStatement(statement)) {
-                                ps2.setString(1, username);
-                                ps2.setString(2, hashedPassword);
-                                try (var rs2 = ps2.executeQuery()) {
-                                    if (rs2.next()) {
-                                        var realUsername = rs2.getString("username");
-                                        var realPassword = rs2.getString("password");
-                                        var realEmail = rs2.getString("email");
-                                        return new UserData(realUsername, realPassword, realEmail);
-                                    }
-                                }
-                            }
+                        UserData realUsername = getUserDataWithPassword(username, password, hashedPassword, conn);
+                        if (realUsername != null) {
+                            return realUsername;
                         }
                     }
                 }
@@ -42,6 +34,25 @@ public class MySqlUserDataAccess extends MySqlDataAccess implements UserDAO {
             throw new DataAccessException("Error: unauthorized", 401);
         }
         throw new DataAccessException("Error: unauthorized", 401);
+    }
+
+    private UserData getUserDataWithPassword(String username, String password, String hashedPassword, Connection conn) throws SQLException {
+        if (BCrypt.checkpw(password, hashedPassword)) {
+            var statement = "SELECT username, password, email FROM User WHERE username=? AND password=?";
+            try (var ps2 = conn.prepareStatement(statement)) {
+                ps2.setString(1, username);
+                ps2.setString(2, hashedPassword);
+                try (var rs2 = ps2.executeQuery()) {
+                    if (rs2.next()) {
+                        var realUsername = rs2.getString("username");
+                        var realPassword = rs2.getString("password");
+                        var realEmail = rs2.getString("email");
+                        return new UserData(realUsername, realPassword, realEmail);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override
