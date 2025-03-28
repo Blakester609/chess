@@ -6,8 +6,14 @@ public class ChessClient {
     private final String serverUrl;
     private boolean signedIn = false;
 
-    public ChessClient(ServerFacade server, String serverUrl) {
-        this.server = server;
+    public ChessClient(String serverUrl) {
+        server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+    }
+
+    public String eval(String input) {
+        var tokens = input.toLowerCase().split(" ");
+        var cmd = (tokens.length > 0) ? tokens[0] : "help";
+        return cmd;
     }
 }
