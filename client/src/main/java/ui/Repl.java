@@ -18,7 +18,14 @@ public class Repl {
         while(!result.equals("quit")) {
             printPrompt();
             String line = scanner.nextLine();
-            result = line;
+            try {
+                result = client.eval(line);
+                System.out.println(SET_TEXT_COLOR_YELLOW + result);
+            } catch (Throwable e) {
+                var msg = e.toString();
+                System.out.println(msg);
+            }
+
         }
     }
 

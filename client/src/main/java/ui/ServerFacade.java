@@ -22,8 +22,9 @@ public class ServerFacade {
         this.serverUrl = serverUrl;
     }
 
-    public AuthData login() {
-        return null;
+    public AuthData login(AuthData authData) throws DataAccessException {
+        var path = "/session";
+        return this.makeRequest("POST", path, authData, AuthData.class);
     }
 
     public AuthData register() {
