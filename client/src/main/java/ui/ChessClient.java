@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import service.JoinRequest;
 
 import java.util.Arrays;
 
@@ -86,6 +87,16 @@ public class ChessClient {
     }
 
     public String playGame(String... params) throws DataAccessException {
+        assertSignedIn();
+        if(params.length >= 2) {
+            var gameID = params[0];
+            var playerColor = params[1];
+            ChessGame.TeamColor actualPlayerColor = ChessGame.TeamColor.WHITE;
+            if (playerColor.equals("black") || playerColor.equals("BLACK")) {
+                actualPlayerColor = ChessGame.TeamColor.BLACK;
+            }
+            server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
+        }
         return "";
     }
 
