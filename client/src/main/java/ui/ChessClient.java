@@ -7,9 +7,11 @@ import model.GameData;
 import model.UserData;
 import service.JoinRequest;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static ui.EscapeSequences.SET_TEXT_COLOR_MAGENTA;
+import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String visitorName = null;
@@ -17,6 +19,7 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean signedIn = false;
+    private final PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -25,7 +28,7 @@ public class ChessClient {
 
     public String eval(String input) {
         try {
-            var tokens = input.toLowerCase().split(" ");
+            var tokens = input.split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch(cmd) {
@@ -34,6 +37,7 @@ public class ChessClient {
                 case "help" -> displayHelp();
                 case "create" -> createGame(params);
                 case "logout" -> logout();
+                case "join" -> playGame(params);
                 case "quit" -> "quit";
                 default -> "try again";
             };
@@ -46,6 +50,7 @@ public class ChessClient {
         if(params.length >= 2) {
             var username = params[0];
             var password = params[1];
+            System.out.println(password);
             AuthData auth = server.login(new UserData(username, password, null));
             userAuth = auth.authToken();
             signedIn = true;
@@ -96,8 +101,10 @@ public class ChessClient {
                 actualPlayerColor = ChessGame.TeamColor.BLACK;
             }
             server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
+            drawBoard();
+            return "";
         }
-        return "";
+        throw new DataAccessException("Expected: <GAMEID> [WHITE|BLACK]", 400);
     }
 
     public String displayHelp() {
@@ -124,5 +131,42 @@ public class ChessClient {
         if (!signedIn) {
             throw new DataAccessException("You must sign in", 400);
         }
+    }
+
+    private void drawBoard() {
+        out.print(ERASE_SCREEN);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print(EMPTY);
+        String[] columnLabels = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        for (String columnLabel : columnLabels) {
+            out.print(columnLabel + "  ");
+        }
+        out.print("  ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+        printCheckeredRow();
+    }
+
+    private void printCheckeredRow() {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print("8 ");
+        out.print(SET_TEXT_COLOR_BLUE);
+        String[] pieces = {"R", "N", "B", "Q", "K", "B", "N", "R"};
+        for(int i = 0; i < 8; i++) {
+            if(i % 2 == 1) {
+                out.print(SET_BG_COLOR_DARK_GREY + " " + pieces[i] + " ");
+            } else {
+                out.print(SET_BG_COLOR_WHITE + " " + pieces[i] + " ");
+            }
+        }
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(" 8 ");
+        out.print(RESET_BG_COLOR);
+        out.println();
     }
 }
