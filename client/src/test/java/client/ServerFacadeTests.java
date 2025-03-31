@@ -1,9 +1,12 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
+import service.JoinRequest;
 import ui.ServerFacade;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -64,6 +67,42 @@ public class ServerFacadeTests {
     @Test
     public void logoutFailure() throws DataAccessException {
         assertThrows(DataAccessException.class, () -> facade.logout("awsdfasdfasfd"));
+    }
+
+    @Test
+    public void createGameSuccess() throws DataAccessException {
+        var authData = facade.login(new UserData("Blake", "Pie123", null));
+        var gameMap = facade.createGame(new GameData(0, "", "", "Josiah-Game", new ChessGame()), authData.authToken());
+        assertTrue((Double) gameMap.get("gameID") >= 1.0);
+    }
+
+    @Test
+    public void createGameFail() {
+        assertThrows(DataAccessException.class, () -> facade.createGame(new GameData(0, "", "", "Josiah-Game", new ChessGame()), "asdfasdfsde"));
+    }
+
+    @Test
+    public void joinGameSuccess() throws DataAccessException {
+        var authData = facade.login(new UserData("Blake", "Pie123", null));
+        assertDoesNotThrow(() -> facade.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, 4), authData.authToken()));
+    }
+
+    @Test
+    public void joinGameFail() throws DataAccessException {
+        var authData = facade.login(new UserData("Blake", "Pie123", null));
+        assertThrows(DataAccessException.class, () -> facade.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, 20), authData.authToken()));
+    }
+
+    @Test
+    public void listGamesSuccess() throws DataAccessException {
+        var authData = facade.login(new UserData("Blake", "Pie123", null));
+        var gamesList = facade.listGames(authData.authToken());
+        assertFalse(gamesList.isEmpty());
+    }
+
+    @Test
+    public void listGamesFail() throws DataAccessException {
+        assertThrows(DataAccessException.class, () -> facade.listGames("asdfasdf"));
     }
 
 

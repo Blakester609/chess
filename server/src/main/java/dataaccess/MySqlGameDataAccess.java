@@ -15,7 +15,6 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
     public GameData createGame(GameData gameData) throws DataAccessException {
         var statement = "INSERT INTO Game (whiteUsername, blackUsername, gameName, json) VALUES (?, ?, ?, ?)";
         var json = new Gson().toJson(gameData.getGame());
-        System.out.println(json);
         var id = executeUpdate(statement, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), json);
         return new GameData(id, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), gameData.getGame());
     }

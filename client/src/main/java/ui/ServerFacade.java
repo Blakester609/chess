@@ -12,8 +12,12 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import dataaccess.DataAccessException;
 import model.UserData;
+import service.JoinRequest;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -25,55 +29,61 @@ public class ServerFacade {
 
     public AuthData login(UserData userData) throws DataAccessException {
         var path = "/session";
-        return this.makeRequest("POST", path, userData, AuthData.class);
+        return this.makeRequest("POST", path, userData, null, AuthData.class);
     }
 
     public AuthData register(UserData userData) throws DataAccessException {
         var path = "/user";
-        return this.makeRequest("POST", path, userData, AuthData.class);
+        return this.makeRequest("POST", path, userData, null, AuthData.class);
     }
 
     public void logout(String authToken) throws DataAccessException {
         var path = "/session";
-        this.makeRequest("DELETE", path, authToken, null);
+        this.makeRequest("DELETE", path, authToken, authToken, null);
     }
 
-    public GameData createGame(GameData gameData, String authToken) {
+    public Map createGame(GameData gameData, String authToken) throws DataAccessException {
         var path = "/game";
-        return this.makeRequest("POST", path, );
+        return this.makeRequest("POST", path, gameData, authToken, Map.class);
     }
 
-    public void joinGame() {
-
+    public void joinGame(JoinRequest request, String authToken) throws DataAccessException {
+        var path = "/game";
+        this.makeRequest("PUT", path, request, authToken, null);
     }
 
-    public ArrayList<GameData> listGames() {
-        return null;
+    public Map listGames(String authToken) throws DataAccessException {
+        var path="/game";
+        return this.makeRequest("GET", path, authToken, authToken, Map.class);
     }
 
-    private static void writeBody(Object request, HttpURLConnection http) throws IOException {
+    private static void writeBody(Object request, String authToken, HttpURLConnection http) throws IOException {
         if (request != null) {
             http.addRequestProperty("Content-Type", "application/json");
+            if(authToken != null) {
+                http.addRequestProperty("authorization", authToken);
+            }
+            String reqData;
             if(request.getClass() == String.class) {
-                http.addRequestProperty("authorization", (String) request);
+                reqData = "";
             } else {
-                String reqData = new Gson().toJson(request);
+                reqData = new Gson().toJson(request);
                 System.out.println(reqData);
                 try (OutputStream reqBody = http.getOutputStream()) {
                     reqBody.write(reqData.getBytes());
                 }
             }
+
         }
     }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws DataAccessException {
+    private <T> T makeRequest(String method, String path, Object request, String authToken, Class<T> responseClass) throws DataAccessException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
             http.setRequestMethod(method);
             http.setDoOutput(true);
-
-            writeBody(request, http);
+            writeBody(request, authToken, http);
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);
