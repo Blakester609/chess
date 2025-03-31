@@ -43,6 +43,7 @@ public class ChessClient {
                 case "logout" -> logout();
                 case "join" -> playGame(params);
                 case "list" -> listGames();
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> "try again";
             };
@@ -85,8 +86,22 @@ public class ChessClient {
         return results.toString();
     }
 
-    public void observeGame() throws DataAccessException {
+    public String observeGame(String... params) throws DataAccessException {
         assertSignedIn();
+        if(params.length == 1) {
+            var gameID = params[0];
+            var gamesList = server.listGames(userAuth);
+            var gson = new Gson();
+            ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
+            for(int i = 0; i < games.size(); i++) {
+                var result = gson.fromJson(String.valueOf(games.get(i)), ListResult.class);
+                if(String.valueOf(result.gameID()).equals(gameID)) {
+                    drawBoardWhitePerspective();
+                    return "";
+                }
+            }
+        }
+        throw new DataAccessException("Expected: <gameID>", 400);
     }
 
     public String register(String... params) throws DataAccessException {
