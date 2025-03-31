@@ -48,7 +48,7 @@ public class ChessClient {
                 default -> "try again";
             };
         } catch (DataAccessException e) {
-            return e.getMessage();
+            return "An unknown error occurred. Please try creating a game or taking another action.";
         }
     }
 

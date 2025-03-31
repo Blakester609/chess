@@ -76,7 +76,7 @@ public class ServerFacadeTests {
     @Test
     public void createGameSuccess() throws DataAccessException {
         var authData = facade.login(new UserData("Blake", "Pie123", null));
-        var gameMap = facade.createGame(new GameData(0, "", "", "other-game", new ChessGame()), authData.authToken());
+        var gameMap = facade.createGame(new GameData(0, "unclaimed", "unclaimed", "other-game", new ChessGame()), authData.authToken());
         assertTrue((Double) gameMap.get("gameID") >= 1.0);
     }
 
