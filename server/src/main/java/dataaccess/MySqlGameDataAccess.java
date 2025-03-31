@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import exception.DataAccessException;
 import model.GameData;
 
 import java.util.ArrayList;

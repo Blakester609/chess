@@ -2,10 +2,11 @@ package ui;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import exception.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import server.ServerFacade;
 import service.JoinRequest;
 import service.ListResult;
 
@@ -13,7 +14,6 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
 
 import static ui.EscapeSequences.*;
 

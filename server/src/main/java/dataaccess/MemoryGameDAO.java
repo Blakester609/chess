@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import exception.DataAccessException;
 import model.GameData;
 
 import java.util.ArrayList;
@@ -56,13 +57,15 @@ public class MemoryGameDAO implements GameDAO {
             if(game.gameID() == gameID) {
                 switch (playerColor) {
                     case "WHITE":
-                        if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")) {
+                        if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")
+                        || Objects.equals(game.getWhiteUsername(), "unclaimed")) {
                             game.setWhiteUsername(username);
                             return true;
                         }
                         throw new DataAccessException("Error: already taken", 403);
                     case "BLACK":
-                        if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")) {
+                        if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")
+                        || Objects.equals(game.getBlackUsername(), "unclaimed")) {
                             game.setBlackUsername(username);
                             return true;
                         }

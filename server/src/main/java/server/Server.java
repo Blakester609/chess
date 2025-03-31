@@ -3,6 +3,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.*;
+import exception.DataAccessException;
 import model.AuthData;
 import model.UserData;
 import model.GameData;

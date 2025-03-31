@@ -11,7 +11,6 @@ public class Main {
         if (args.length == 1) {
             serverUrl = args[0];
         }
-        var port = server.run(8080);
         new Repl(serverUrl).run();
     }
 }
