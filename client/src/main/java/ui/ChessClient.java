@@ -86,7 +86,7 @@ public class ChessClient {
             var gameName = params[0];
             var gameInfo = server.createGame(
                     new GameData(0, "", "", gameName, new ChessGame()), userAuth);
-            return String.format("Created game %s with ID %s", gameName, gameInfo.get("gameID"));
+            return String.format("Created game %s", gameName);
         }
         throw new DataAccessException("Expected: <GAMENAME>", 400);
     }
@@ -101,7 +101,11 @@ public class ChessClient {
                 actualPlayerColor = ChessGame.TeamColor.BLACK;
             }
             server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
-            drawBoard();
+            if(actualPlayerColor == ChessGame.TeamColor.WHITE) {
+                drawBoardWhitePerspective();
+            } else {
+                drawBoardBlackPerspective();
+            }
             return "";
         }
         throw new DataAccessException("Expected: <GAMEID> [WHITE|BLACK]", 400);
@@ -133,7 +137,51 @@ public class ChessClient {
         }
     }
 
-    private void drawBoard() {
+    private void drawBoardBlackPerspective() {
+        out.print(ERASE_SCREEN);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print(EMPTY);
+        String[] columnLabels = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        for(int i = 7; i >= 0; i--) {
+            out.print(columnLabels[i] + "  ");
+        }
+        out.print("  ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+        printCheckeredRow(SET_TEXT_COLOR_RED, "1", "2",
+                false, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+        printStartRowNumber("3");
+        drawEmptyWhiteLeftRow();
+        printEndRowNumber("3");
+
+        printStartRowNumber("4");
+        drawEmptyBlackLeftRow();
+        printEndRowNumber("4");
+
+        printStartRowNumber("5");
+        drawEmptyWhiteLeftRow();
+        printEndRowNumber("5");
+
+        printStartRowNumber("6");
+        drawEmptyBlackLeftRow();
+        printEndRowNumber("6");
+        printCheckeredRow(SET_TEXT_COLOR_BLUE, "7", "8",
+                true, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print(EMPTY);
+        for(int i = 7; i >= 0; i--) {
+            out.print(columnLabels[i] + "  ");
+        }
+        out.print("  ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+    }
+
+    private void drawBoardWhitePerspective() {
         out.print(ERASE_SCREEN);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -146,27 +194,123 @@ public class ChessClient {
         out.print("  ");
         out.print(RESET_BG_COLOR);
         out.println();
-        printCheckeredRow();
-    }
+        printCheckeredRow(SET_TEXT_COLOR_BLUE, "8", "7",
+                false, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+        printStartRowNumber("6");
+        drawEmptyWhiteLeftRow();
+        printEndRowNumber("6");
 
-    private void printCheckeredRow() {
+        printStartRowNumber("5");
+        drawEmptyBlackLeftRow();
+        printEndRowNumber("5");
+
+        printStartRowNumber("4");
+        drawEmptyWhiteLeftRow();
+        printEndRowNumber("4");
+
+        printStartRowNumber("3");
+        drawEmptyBlackLeftRow();
+        printEndRowNumber("3");
+        printCheckeredRow(SET_TEXT_COLOR_RED, "2", "1",
+                true, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
-        out.print("8 ");
-        out.print(SET_TEXT_COLOR_BLUE);
-        String[] pieces = {"R", "N", "B", "Q", "K", "B", "N", "R"};
-        for(int i = 0; i < 8; i++) {
-            if(i % 2 == 1) {
-                out.print(SET_BG_COLOR_DARK_GREY + " " + pieces[i] + " ");
-            } else {
-                out.print(SET_BG_COLOR_WHITE + " " + pieces[i] + " ");
-            }
+        out.print(EMPTY);
+        for (String columnLabel : columnLabels) {
+            out.print(columnLabel + "  ");
+        }
+        out.print("  ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+    }
+
+    private void printStartRowNumber(String num) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print(num + " ");
+    }
+
+    private void printEndRowNumber(String num) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(" " + num + " ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+    }
+
+    private void printCheckeredRow(String textColor, String firstRow, String secondRow,
+                                   boolean pawnsFirst, String boardLeftColor, String secondTileColor) {
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(EMPTY);
+        out.print(firstRow + " ");
+        out.print(textColor);
+        if(pawnsFirst) {
+            printPawns(boardLeftColor, secondTileColor);
+        } else {
+            printNotPawns(boardLeftColor, secondTileColor);
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
-        out.print(" 8 ");
+        out.print(" " + firstRow + " ");
         out.print(RESET_BG_COLOR);
         out.println();
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(EMPTY);
+        out.print(secondRow + " ");
+        out.print(textColor);
+        if(!pawnsFirst) {
+            printPawns(secondTileColor, boardLeftColor);
+        } else {
+            printNotPawns(secondTileColor, boardLeftColor);
+        }
+        out.print(SET_BG_COLOR_LIGHT_GREY);
+        out.print(SET_TEXT_COLOR_BLACK);
+        out.print(" " + secondRow + " ");
+        out.print(RESET_BG_COLOR);
+        out.println();
+    }
+
+    private void printPawns(String startRowColor, String secondTileColor) {
+        for(int i = 0; i < 8; i++) {
+            if(i % 2 == 1) {
+                out.print(secondTileColor + " P ");
+            } else {
+                out.print(startRowColor + " P ");
+            }
+        }
+    }
+
+    private void printNotPawns(String startRowColor, String secondTileColor) {
+        String[] pieces = {"R", "N", "B", "Q", "K", "B", "N", "R"};
+        for(int i = 0; i < 8; i++) {
+            if(i % 2 == 1) {
+                out.print(secondTileColor + " " + pieces[i] + " ");
+            } else {
+                out.print(startRowColor + " " + pieces[i] + " ");
+            }
+        }
+    }
+
+    private void drawEmptyWhiteLeftRow() {
+        for(int i = 0; i < 8; i++) {
+            if(i % 2 == 1) {
+                out.print(SET_BG_COLOR_DARK_GREY + "   ");
+            } else {
+                out.print(SET_BG_COLOR_WHITE + "   ");
+            }
+        }
+    }
+
+    private void drawEmptyBlackLeftRow() {
+        for(int i = 0; i < 8; i++) {
+            if(i % 2 == 1) {
+                out.print(SET_BG_COLOR_WHITE + "   ");
+            } else {
+                out.print(SET_BG_COLOR_DARK_GREY + "   ");
+            }
+        }
     }
 }
