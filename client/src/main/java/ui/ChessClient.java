@@ -1,15 +1,19 @@
 package ui;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import service.JoinRequest;
+import service.ListResult;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 import static ui.EscapeSequences.*;
 
@@ -57,6 +61,18 @@ public class ChessClient {
             return String.format("Signed in as %s", username);
         }
         throw new DataAccessException("Expected: <username> <password>", 400);
+    }
+
+    public String listGames() throws DataAccessException {
+        assertSignedIn();
+        var gamesList = server.listGames(userAuth);
+        var results = new StringBuilder();
+        var gson = new Gson();
+        var games = (Object[]) gamesList.get("games");
+        for(var game : games) {
+            var result = gson.fromJson((String) game, ListResult.class);
+        }
+        return null;
     }
 
     public String register(String... params) throws DataAccessException {

@@ -1,13 +1,17 @@
 package client;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import service.JoinRequest;
+import service.ListResult;
 import ui.ServerFacade;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -97,6 +101,9 @@ public class ServerFacadeTests {
     public void listGamesSuccess() throws DataAccessException {
         var authData = facade.login(new UserData("Blake", "Pie123", null));
         var gamesList = facade.listGames(authData.authToken());
+        ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
+        var firstGame = new Gson().fromJson(String.valueOf(games.get(0)), ListResult.class);
+        System.out.println(firstGame.getClass());
         assertFalse(gamesList.isEmpty());
     }
 
