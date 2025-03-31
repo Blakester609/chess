@@ -48,7 +48,7 @@ public class ChessClient {
                 default -> "try again";
             };
         } catch (DataAccessException e) {
-            return "An unknown error occurred. Please try creating a game or taking another action.";
+            return e.getMessage();
         }
     }
 
@@ -56,7 +56,12 @@ public class ChessClient {
         if(params.length >= 2) {
             var username = params[0];
             var password = params[1];
-            AuthData auth = server.login(new UserData(username, password, null));
+            AuthData auth;
+            try {
+                auth = server.login(new UserData(username, password, null));
+            } catch(Exception e) {
+                throw new DataAccessException("Incorrect username or password", 400);
+            }
             userAuth = auth.authToken();
             signedIn = true;
             return String.format("Signed in as %s", username);
@@ -109,7 +114,12 @@ public class ChessClient {
             var username = params[0];
             var password = params[1];
             var email = params[2];
-            AuthData auth = server.register(new UserData(username, password, email));
+            AuthData auth;
+            try {
+                auth = server.register(new UserData(username, password, email));
+            } catch (Exception e) {
+                throw new DataAccessException("Username is already taken. Try again.", 400);
+            }
             userAuth = auth.authToken();
             signedIn = true;
             return String.format("Welcome to Chess, %s!", username);
@@ -145,7 +155,11 @@ public class ChessClient {
             if (playerColor.equals("black") || playerColor.equals("BLACK")) {
                 actualPlayerColor = ChessGame.TeamColor.BLACK;
             }
-            server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
+            try {
+                server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
+            } catch (Exception e) {
+                throw new DataAccessException("Must provide a valid game ID as an integer, e.g. join 1 white/black", 400);
+            }
             if(actualPlayerColor == ChessGame.TeamColor.WHITE) {
                 drawBoardWhitePerspective();
             } else {
@@ -196,7 +210,7 @@ public class ChessClient {
         out.print(RESET_BG_COLOR);
         out.println();
         printCheckeredRow(SET_TEXT_COLOR_RED, "1", "2",
-                false, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+                false, true);
         printStartRowNumber("3");
         drawEmptyWhiteLeftRow();
         printEndRowNumber("3");
@@ -213,7 +227,7 @@ public class ChessClient {
         drawEmptyBlackLeftRow();
         printEndRowNumber("6");
         printCheckeredRow(SET_TEXT_COLOR_BLUE, "7", "8",
-                true, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+                true, true);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
@@ -240,7 +254,7 @@ public class ChessClient {
         out.print(RESET_BG_COLOR);
         out.println();
         printCheckeredRow(SET_TEXT_COLOR_BLUE, "8", "7",
-                false, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+                false, false);
         printStartRowNumber("6");
         drawEmptyWhiteLeftRow();
         printEndRowNumber("6");
@@ -257,7 +271,7 @@ public class ChessClient {
         drawEmptyBlackLeftRow();
         printEndRowNumber("3");
         printCheckeredRow(SET_TEXT_COLOR_RED, "2", "1",
-                true, SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
+                true, false);
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
@@ -286,16 +300,16 @@ public class ChessClient {
     }
 
     private void printCheckeredRow(String textColor, String firstRow, String secondRow,
-                                   boolean pawnsFirst, String boardLeftColor, String secondTileColor) {
+                                   boolean pawnsFirst, boolean blackPerspective) {
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
         out.print(EMPTY);
         out.print(firstRow + " ");
         out.print(textColor);
         if(pawnsFirst) {
-            printPawns(boardLeftColor, secondTileColor);
+            printPawns(EscapeSequences.SET_BG_COLOR_WHITE, EscapeSequences.SET_BG_COLOR_DARK_GREY);
         } else {
-            printNotPawns(boardLeftColor, secondTileColor);
+            printNotPawns(EscapeSequences.SET_BG_COLOR_WHITE, EscapeSequences.SET_BG_COLOR_DARK_GREY, blackPerspective);
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -307,9 +321,9 @@ public class ChessClient {
         out.print(secondRow + " ");
         out.print(textColor);
         if(!pawnsFirst) {
-            printPawns(secondTileColor, boardLeftColor);
+            printPawns(EscapeSequences.SET_BG_COLOR_DARK_GREY, EscapeSequences.SET_BG_COLOR_WHITE);
         } else {
-            printNotPawns(secondTileColor, boardLeftColor);
+            printNotPawns(EscapeSequences.SET_BG_COLOR_DARK_GREY, EscapeSequences.SET_BG_COLOR_WHITE, blackPerspective);
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -328,8 +342,13 @@ public class ChessClient {
         }
     }
 
-    private void printNotPawns(String startRowColor, String secondTileColor) {
-        String[] pieces = {"R", "N", "B", "Q", "K", "B", "N", "R"};
+    private void printNotPawns(String startRowColor, String secondTileColor, boolean blackPerspective) {
+        String[] pieces;
+        if(blackPerspective) {
+            pieces = new String[]{"R", "N", "B", "K", "Q", "B", "N", "R"};
+        } else {
+            pieces = new String[]{"R", "N", "B", "Q", "K", "B", "N", "R"};
+        }
         for(int i = 0; i < 8; i++) {
             if(i % 2 == 1) {
                 out.print(secondTileColor + " " + pieces[i] + " ");
