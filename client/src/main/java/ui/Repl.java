@@ -30,6 +30,6 @@ public class Repl {
     }
 
     private void printPrompt() {
-        System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> " + SET_TEXT_COLOR_RED);
+        System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> ");
     }
 }

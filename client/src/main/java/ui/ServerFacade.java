@@ -68,7 +68,6 @@ public class ServerFacade {
                 reqData = "";
             } else {
                 reqData = new Gson().toJson(request);
-                System.out.println(reqData);
                 try (OutputStream reqBody = http.getOutputStream()) {
                     reqBody.write(reqData.getBytes());
                 }

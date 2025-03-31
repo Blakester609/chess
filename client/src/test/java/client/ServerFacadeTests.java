@@ -38,7 +38,7 @@ public class ServerFacadeTests {
 
     @Test
     public void registerSuccess() throws Exception {
-        var authData = facade.register(new UserData("Blake", "Pie123", "twelve@gmail.com"));
+        var authData = facade.register(new UserData("Barnaby", "Lamb", "eleven@gmail.com"));
         assertTrue(authData.authToken().length() > 10);
     }
 

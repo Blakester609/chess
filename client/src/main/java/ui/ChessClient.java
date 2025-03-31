@@ -6,6 +6,8 @@ import model.UserData;
 
 import java.util.Arrays;
 
+import static ui.EscapeSequences.SET_TEXT_COLOR_MAGENTA;
+
 public class ChessClient {
     private String visitorName = null;
     private final ServerFacade server;
@@ -25,6 +27,7 @@ public class ChessClient {
             return switch(cmd) {
                 case "login" -> login(params);
                 case "register" -> register(params);
+                case "help" -> displayHelp();
                 case "quit" -> "quit";
                 default -> "try again";
             };
@@ -49,8 +52,30 @@ public class ChessClient {
             var password = params[1];
             var email = params[2];
             AuthData auth = server.register(new UserData(username, password, email));
-            return String.format("Welcome to Chess, %s!", auth.username());
+            signedIn = true;
+            return String.format("Welcome to Chess, %s! Here is your auth token: %s", username, auth.authToken());
         }
         throw new DataAccessException("Expected: <username> <password> <email>", 400);
+    }
+
+
+    public String displayHelp() {
+        if(!signedIn) {
+            return SET_TEXT_COLOR_MAGENTA + """
+                    - register <USERNAME> <PASSWORD> <EMAIL> - to create an account
+                    - login <USERNAME> <PASSWORD> - to play chess
+                    - quit
+                    - help
+                    """;
+        }
+        return SET_TEXT_COLOR_MAGENTA + """
+                - create <GAMENAME> - create a game
+                - list - list all games
+                - join <GAMEID> [WHITE|BLACK] - join a game as that color
+                - observe <GAMEID> - observe a game
+                - logout
+                - quit
+                - help
+                """;
     }
 }
