@@ -88,7 +88,7 @@ public class ServerFacadeTests {
     @Test
     public void joinGameSuccess() throws DataAccessException {
         var authData = facade.login(new UserData("Blake", "Pie123", null));
-        assertDoesNotThrow(() -> facade.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, 4), authData.authToken()));
+        assertDoesNotThrow(() -> facade.joinGame(new JoinRequest(ChessGame.TeamColor.WHITE, 1), authData.authToken()));
     }
 
     @Test

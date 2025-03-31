@@ -58,14 +58,14 @@ public class MemoryGameDAO implements GameDAO {
                 switch (playerColor) {
                     case "WHITE":
                         if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")
-                        || Objects.equals(game.getWhiteUsername(), "unclaimed")) {
+                        || game.getWhiteUsername().equals("unclaimed")) {
                             game.setWhiteUsername(username);
                             return true;
                         }
                         throw new DataAccessException("Error: already taken", 403);
                     case "BLACK":
                         if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")
-                        || Objects.equals(game.getBlackUsername(), "unclaimed")) {
+                        || game.getBlackUsername().equals("unclaimed")) {
                             game.setBlackUsername(username);
                             return true;
                         }

@@ -49,14 +49,16 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
         GameData game = getGame(gameID);
         switch (playerColor) {
             case "WHITE":
-                if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")) {
+                if(game.getWhiteUsername() == null || Objects.equals(game.getWhiteUsername(), "")
+                || game.getWhiteUsername().equals("unclaimed")) {
                     var statement = "UPDATE Game SET whiteUsername=? WHERE id=?";
                     executeUpdate(statement, username, gameID);
                     return true;
                 }
                 throw new DataAccessException("Error: already taken", 403);
             case "BLACK":
-                if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")) {
+                if(game.getBlackUsername() == null || Objects.equals(game.getBlackUsername(), "")
+                        || game.getBlackUsername().equals("unclaimed") ) {
                     var statement = "UPDATE Game SET blackUsername=? WHERE id=?";
                     executeUpdate(statement, username, gameID);
                     return true;
