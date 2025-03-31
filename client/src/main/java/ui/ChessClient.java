@@ -42,6 +42,7 @@ public class ChessClient {
                 case "create" -> createGame(params);
                 case "logout" -> logout();
                 case "join" -> playGame(params);
+                case "list" -> listGames();
                 case "quit" -> "quit";
                 default -> "try again";
             };
@@ -54,7 +55,6 @@ public class ChessClient {
         if(params.length >= 2) {
             var username = params[0];
             var password = params[1];
-            System.out.println(password);
             AuthData auth = server.login(new UserData(username, password, null));
             userAuth = auth.authToken();
             signedIn = true;
@@ -68,11 +68,25 @@ public class ChessClient {
         var gamesList = server.listGames(userAuth);
         var results = new StringBuilder();
         var gson = new Gson();
-        var games = (Object[]) gamesList.get("games");
-        for(var game : games) {
-            var result = gson.fromJson((String) game, ListResult.class);
+        ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
+        var result = gson.fromJson(String.valueOf(games.get(0)), ListResult.class);
+        for(int i = 0; i < games.size(); i++) {
+            result = gson.fromJson(String.valueOf(games.get(i)), ListResult.class);
+            results.append(i+1);
+            results.append(". ");
+            results.append(result.gameName());
+            results.append("\n");
+            results.append("White: ");
+            results.append(result.whiteUsername());
+            results.append("  Black: ");
+            results.append(result.blackUsername());
+            results.append("\n\n");
         }
-        return null;
+        return results.toString();
+    }
+
+    public void observeGame() throws DataAccessException {
+        assertSignedIn();
     }
 
     public String register(String... params) throws DataAccessException {
@@ -101,7 +115,7 @@ public class ChessClient {
         if(params.length >= 1) {
             var gameName = params[0];
             var gameInfo = server.createGame(
-                    new GameData(0, "", "", gameName, new ChessGame()), userAuth);
+                    new GameData(0, "unclaimed", "unclaimed", gameName, new ChessGame()), userAuth);
             return String.format("Created game %s", gameName);
         }
         throw new DataAccessException("Expected: <GAMENAME>", 400);

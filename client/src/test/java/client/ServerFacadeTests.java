@@ -42,7 +42,7 @@ public class ServerFacadeTests {
 
     @Test
     public void registerSuccess() throws Exception {
-        var authData = facade.register(new UserData("Barnaby", "Lamb", "eleven@gmail.com"));
+        var authData = facade.register(new UserData("Blake", "Pie123", "twelve@gmail.com"));
         assertTrue(authData.authToken().length() > 10);
     }
 
@@ -76,7 +76,7 @@ public class ServerFacadeTests {
     @Test
     public void createGameSuccess() throws DataAccessException {
         var authData = facade.login(new UserData("Blake", "Pie123", null));
-        var gameMap = facade.createGame(new GameData(0, "", "", "Josiah-Game", new ChessGame()), authData.authToken());
+        var gameMap = facade.createGame(new GameData(0, "as", "as", "Josiah-Game", new ChessGame()), authData.authToken());
         assertTrue((Double) gameMap.get("gameID") >= 1.0);
     }
 
@@ -103,7 +103,7 @@ public class ServerFacadeTests {
         var gamesList = facade.listGames(authData.authToken());
         ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
         var firstGame = new Gson().fromJson(String.valueOf(games.get(0)), ListResult.class);
-        System.out.println(firstGame.getClass());
+        System.out.println(firstGame.whiteUsername());
         assertFalse(gamesList.isEmpty());
     }
 
