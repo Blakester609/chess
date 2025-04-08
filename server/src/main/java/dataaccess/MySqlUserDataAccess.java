@@ -23,7 +23,7 @@ public class MySqlUserDataAccess extends MySqlDataAccess implements UserDAO {
         } catch (Exception ignored) {
 
         }
-        throw new DataAccessException("An error occurred", 500);
+        throw new DataAccessException("An error occurred", 401);
     }
 
     private UserData getUserDataFinal(String username, String password, Connection conn, String statementOne)

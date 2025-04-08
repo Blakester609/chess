@@ -14,14 +14,15 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
-    private String visitorName = null;
     private String userAuth = null;
     private final ServerFacade server;
     private final String serverUrl;
+    private HashMap<Integer, Integer> gameIdsMap = new HashMap<>();
     private boolean signedIn = false;
     private final PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
@@ -71,6 +72,9 @@ public class ChessClient {
 
     public String listGames() throws DataAccessException {
         assertSignedIn();
+        if(gameIdsMap != null) {
+            gameIdsMap.clear();
+        }
         var gamesList = server.listGames(userAuth);
         var results = new StringBuilder();
         var gson = new Gson();
@@ -86,6 +90,7 @@ public class ChessClient {
             results.append(result.whiteUsername());
             results.append("  Black: ");
             results.append(result.blackUsername());
+            gameIdsMap.put(i+1, result.gameID());
             results.append("\n\n");
         }
         return results.toString();
@@ -95,16 +100,17 @@ public class ChessClient {
         assertSignedIn();
         if(params.length == 1) {
             var gameID = params[0];
+            int realGameID = Integer.parseInt(gameID);
             var gamesList = server.listGames(userAuth);
             var gson = new Gson();
             ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
-            for(int i = 0; i < games.size(); i++) {
-                var result = gson.fromJson(String.valueOf(games.get(i)), ListResult.class);
-                if(String.valueOf(result.gameID()).equals(gameID)) {
-                    drawBoardWhitePerspective();
-                    return "";
-                }
+            try {
+                var result = gson.fromJson(String.valueOf(games.get(gameIdsMap.get(realGameID)-1)), ListResult.class);
+            } catch (Exception e) {
+                throw new DataAccessException("Must provide a valid game ID as an integer", 400);
             }
+            drawBoardWhitePerspective();
+            return "";
         }
         throw new DataAccessException("Expected: <gameID>", 400);
     }
@@ -151,9 +157,13 @@ public class ChessClient {
         if(params.length >= 2) {
             var gameID = params[0];
             var playerColor = params[1];
-            ChessGame.TeamColor actualPlayerColor = ChessGame.TeamColor.WHITE;
-            if (playerColor.equals("black") || playerColor.equals("BLACK")) {
+            ChessGame.TeamColor actualPlayerColor = null;
+            if (playerColor.equals("white") || playerColor.equals("WHITE")) {
+                actualPlayerColor = ChessGame.TeamColor.WHITE;
+            } else if (playerColor.equals("black") || playerColor.equals("BLACK")) {
                 actualPlayerColor = ChessGame.TeamColor.BLACK;
+            } else {
+                throw new DataAccessException("Must choose black or white team color", 400);
             }
             try {
                 server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
