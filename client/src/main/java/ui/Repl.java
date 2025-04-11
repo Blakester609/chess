@@ -1,14 +1,17 @@
 package ui;
 
+import websocket.ServerMessageObserver;
+import websocket.messages.ServerMessage;
+
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements ServerMessageObserver {
     private final ChessClient client;
 
     public Repl(String serverUrl) {
-        client = new ChessClient(serverUrl);
+        client = new ChessClient(serverUrl, this);
     }
 
     public void run() {
@@ -31,5 +34,10 @@ public class Repl {
 
     private void printPrompt() {
         System.out.print("\n" + SET_TEXT_COLOR_WHITE + ">>> ");
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+
     }
 }

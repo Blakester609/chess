@@ -9,6 +9,8 @@ import model.UserData;
 import server.ServerFacade;
 import service.JoinRequest;
 import service.ListResult;
+import websocket.ServerMessageObserver;
+import websocket.WebSocketFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -22,13 +24,16 @@ public class ChessClient {
     private String userAuth = null;
     private final ServerFacade server;
     private final String serverUrl;
+    private WebSocketFacade ws;
+    private ServerMessageObserver serverMessageObserver;
     private HashMap<Integer, Integer> gameIdsMap = new HashMap<>();
     private boolean signedIn = false;
     private final PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
-    public ChessClient(String serverUrl) {
+    public ChessClient(String serverUrl, ServerMessageObserver serverMessageObserver) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
+        this.serverMessageObserver = serverMessageObserver;
     }
 
     public String eval(String input) {
