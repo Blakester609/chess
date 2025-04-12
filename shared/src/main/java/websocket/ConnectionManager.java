@@ -2,6 +2,7 @@ package websocket;
 
 import chess.ChessGame;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,11 +20,11 @@ public class ConnectionManager {
         connections.remove(username);
     }
 
-    public void broadcast(String excludeVisitorName, Notification notification) throws IOException {
+    public void broadcast(String excludeUsername, ServerMessage notification) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.visitorName.equals(excludeVisitorName)) {
+                if (!c.username.equals(excludeUsername)) {
                     c.send(notification.toString());
                 }
             } else {
@@ -33,7 +34,7 @@ public class ConnectionManager {
 
         // Clean up any connections that were left open.
         for (var c : removeList) {
-            connections.remove(c.visitorName);
+            connections.remove(c.username);
         }
     }
 
