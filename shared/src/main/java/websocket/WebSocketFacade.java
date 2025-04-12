@@ -4,6 +4,8 @@ package websocket;
 
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import websocket.messages.ErrorMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import javax.websocket.Endpoint;
@@ -15,16 +17,18 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
+
 public class WebSocketFacade extends Endpoint {
 
     Session session;
-    ServerMessageObserver serverMessageObserver;
+    ServerMessageObserver observer;
 
     public WebSocketFacade(String url, ServerMessageObserver serverMessageObserver) throws DataAccessException {
         try {
             url = url.replace("http", "ws");
             URI socketUri = new URI(url + "/ws");
-            this.serverMessageObserver = serverMessageObserver;
+            this.observer = serverMessageObserver;
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, socketUri);
@@ -34,10 +38,10 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     try {
-                        ServerMessage someMessage = new Gson().fromJson(message, ServerMessage.class);
-                        observer.notify(message);
+                        ServerMessage someMessage = new Gson().fromJson(message, NotificationMessage.class);
+                        observer.notify(someMessage);
                     } catch (Exception e) {
-                        observer.notify(new DataAccessException(e.getMessage(), 500));
+                        observer.notify(new ErrorMessage(ERROR, e.getMessage()));
                     }
 
                 }
