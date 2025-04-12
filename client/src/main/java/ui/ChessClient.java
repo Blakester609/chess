@@ -70,6 +70,7 @@ public class ChessClient {
             }
             userAuth = auth.authToken();
             signedIn = true;
+            ws = new WebSocketFacade(serverUrl, serverMessageObserver);
             return String.format("Signed in as %s", username);
         }
         throw new DataAccessException("Expected: <username> <password>", 400);
@@ -172,6 +173,7 @@ public class ChessClient {
             }
             try {
                 server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
+                ws.connectToGame(userAuth, Integer.parseInt(gameID));
             } catch (Exception e) {
                 throw new DataAccessException("Must provide a valid game ID as an integer, e.g. join 1 white/black", 400);
             }

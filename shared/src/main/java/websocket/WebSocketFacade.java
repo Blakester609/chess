@@ -4,6 +4,7 @@ package websocket;
 
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static websocket.commands.UserGameCommand.CommandType.CONNECT;
 import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
 
 public class WebSocketFacade extends Endpoint {
@@ -53,4 +55,13 @@ public class WebSocketFacade extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {}
+
+    public void connectToGame(String authToken, Integer gameID) throws DataAccessException {
+        try{
+            var command = new UserGameCommand(CONNECT, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        }catch(IOException e) {
+            throw new DataAccessException(e.getMessage(), 500);
+        }
+    }
 }
