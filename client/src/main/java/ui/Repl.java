@@ -1,6 +1,7 @@
 package ui;
 
 import websocket.ServerMessageObserver;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Scanner;
@@ -38,6 +39,8 @@ public class Repl implements ServerMessageObserver {
 
     @Override
     public void notify(ServerMessage message) {
-
+        NotificationMessage someMessage = (NotificationMessage) message;
+        System.out.println(SET_TEXT_COLOR_YELLOW + someMessage.getMessage());
+        printPrompt();
     }
 }

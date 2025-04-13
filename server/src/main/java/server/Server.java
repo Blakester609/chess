@@ -10,7 +10,6 @@ import model.GameData;
 import service.JoinRequest;
 import service.UserService;
 import spark.*;
-import websocket.WebSocketHandler;
 
 import java.util.Map;
 
@@ -40,6 +39,7 @@ public class Server {
         }
         userService = new UserService(userDao, authDao, gameDao);
         webSocketHandler = new WebSocketHandler();
+        webSocketHandler.setUserService(userService);
     }
 
 

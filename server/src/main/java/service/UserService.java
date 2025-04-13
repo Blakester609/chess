@@ -43,10 +43,18 @@ public class UserService {
         return gameDao.createGame(gameData);
     }
 
+    public AuthData retrieveAuthData(String authToken) throws DataAccessException {
+        return authDao.getAuth(authToken);
+    }
+
     public boolean join(JoinRequest joinRequest, String authToken) throws DataAccessException {
         AuthData authData = authDao.getAuth(authToken);
         GameData gameData = gameDao.getGame(joinRequest.gameID());
         return gameDao.updateGame(String.valueOf(joinRequest.playerColor()), gameData.gameID(), authData.username());
+    }
+
+    public GameData retrieveGameData(int gameID) throws DataAccessException {
+        return gameDao.getGame(gameID);
     }
 
     public ArrayList<ListResult> list(String authToken) throws DataAccessException {
