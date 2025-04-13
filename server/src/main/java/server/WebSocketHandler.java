@@ -67,7 +67,7 @@ public class WebSocketHandler {
         var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(serverMessage);
         var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
-
+        connections.broadcast(loadGameMessage);
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) {
