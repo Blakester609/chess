@@ -8,6 +8,11 @@ import java.io.IOException;
 public class Connection {
     public String username;
     public Session session;
+
+    public Integer getGameID() {
+        return gameID;
+    }
+
     public Integer gameID;
 
     public Connection(String username, Session session, Integer gameID) {

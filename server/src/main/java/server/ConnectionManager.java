@@ -5,6 +5,7 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -19,12 +20,31 @@ public class ConnectionManager {
         connections.remove(username);
     }
 
-    public void broadcast(ServerMessage notification) throws IOException {
-        System.out.println("Trying to broadcast");
+    public void broadcast(ServerMessage notification, Integer gameID) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                c.send(notification.toString());
+                if((Objects.equals(c.gameID, gameID))) {
+                    c.send(notification.toString());
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.username);
+        }
+    }
+
+    public void broadcastNotification(String excludeUsername, ServerMessage notification, Integer gameID) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if(!c.username.equals(excludeUsername) && (Objects.equals(c.gameID, gameID))) {
+                    c.send(notification.toString());
+                }
             } else {
                 removeList.add(c);
             }

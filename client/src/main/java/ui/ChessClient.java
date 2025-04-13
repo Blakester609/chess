@@ -26,6 +26,7 @@ import static ui.EscapeSequences.*;
 
 public class ChessClient {
     private String userAuth = null;
+    private String userName = null;
     private final ServerFacade server;
     private final String serverUrl;
     private WebSocketFacade ws;
@@ -69,6 +70,7 @@ public class ChessClient {
             AuthData auth;
             try {
                 auth = server.login(new UserData(username, password, null));
+                userName = auth.username();
             } catch(Exception e) {
                 throw new DataAccessException("Incorrect username or password", 400);
             }
@@ -191,7 +193,7 @@ public class ChessClient {
         throw new DataAccessException("Expected: <GAMEID> [WHITE|BLACK]", 400);
     }
 
-    public String drawBoard(ChessBoard board, String playerColor) {
+    public String drawBoard(ChessBoard board, GameData gameData) {
         StringBuilder boardString = new StringBuilder();
         boardString.append(ERASE_SCREEN);
         boardString.append(SET_BG_COLOR_LIGHT_GREY);
@@ -199,47 +201,81 @@ public class ChessClient {
         boardString.append(EMPTY);
         boardString.append(EMPTY);
         String[] columnLabels = {"a", "b", "c", "d", "e", "f", "g", "h"};
-        for (String columnLabel : columnLabels) {
-            boardString.append(columnLabel).append("  ");
+        if(gameData.getBlackUsername().equals(userName)) {
+            columnLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
         }
+        drawColumnLabels(columnLabels, boardString);
         boardString.append("  ").append(RESET_BG_COLOR).append("\n");
-        for(int i = 7; i >= 0; i--) {
+        if(gameData.getWhiteUsername().equals(userName)) {
+            drawTilesWhitePerspective(board, boardString);
+        } else if(gameData.getBlackUsername().equals(userName)) {
+            drawTilesBlackPerspective(board, boardString);
+        }
+
+        boardString.append(SET_BG_COLOR_LIGHT_GREY);
+        boardString.append(SET_TEXT_COLOR_BLACK);
+        boardString.append(EMPTY);
+        boardString.append(EMPTY);
+        drawColumnLabels(columnLabels, boardString);
+        boardString.append("  ");
+        boardString.append(RESET_BG_COLOR).append("\n");
+        return boardString.toString();
+    }
+
+    private void drawTilesBlackPerspective(ChessBoard board, StringBuilder boardString) {
+        for(int i = 0; i < 8; i++) {
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
-            for(int j = 7; j >= 0; j--) {
-                ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
-                if(((j % 2 == 1) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 0))) {
-                    if(piece != null) {
-                        boardString.append(SET_BG_COLOR_WHITE);
-                    } else {
-                        boardString.append(SET_BG_COLOR_WHITE + "   ");
-                    }
-                } else {
-                    if (piece != null) {
-                        boardString.append(SET_BG_COLOR_DARK_GREY);
-                    } else {
-                        boardString.append(SET_BG_COLOR_DARK_GREY + "   ");
-                    }
-                }
-                drawPieces(piece, boardString);
+            for(int j = 0; j < 8; j++) {
+                drawTheseTiles(board, boardString, i, j);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(" ").append(i+1).append(" ");
             boardString.append(RESET_BG_COLOR).append("\n");
         }
-        boardString.append(SET_BG_COLOR_LIGHT_GREY);
-        boardString.append(SET_TEXT_COLOR_BLACK);
-        boardString.append(EMPTY);
-        boardString.append(EMPTY);
+    }
+
+    private void drawTheseTiles(ChessBoard board, StringBuilder boardString, int i, int j) {
+        ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
+        if(((j % 2 == 1) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 0))) {
+            if(piece != null) {
+                boardString.append(SET_BG_COLOR_WHITE);
+            } else {
+                boardString.append(SET_BG_COLOR_WHITE + "   ");
+            }
+        } else {
+            if (piece != null) {
+                boardString.append(SET_BG_COLOR_DARK_GREY);
+            } else {
+                boardString.append(SET_BG_COLOR_DARK_GREY + "   ");
+            }
+        }
+        drawPieces(piece, boardString);
+    }
+
+    private void drawTilesWhitePerspective(ChessBoard board, StringBuilder boardString) {
+        for(int i = 7; i >= 0; i--) {
+            boardString.append(SET_BG_COLOR_LIGHT_GREY);
+            boardString.append(SET_TEXT_COLOR_BLACK);
+            boardString.append(EMPTY);
+            boardString.append(i + 1).append(" ");
+            for(int j = 7; j >= 0; j--) {
+                drawTheseTiles(board, boardString, i, j);
+            }
+            boardString.append(SET_BG_COLOR_LIGHT_GREY);
+            boardString.append(SET_TEXT_COLOR_BLACK);
+            boardString.append(" ").append(i+1).append(" ");
+            boardString.append(RESET_BG_COLOR).append("\n");
+        }
+    }
+
+    private void drawColumnLabels(String[] columnLabels, StringBuilder boardString) {
         for (String columnLabel : columnLabels) {
             boardString.append(columnLabel).append("  ");
         }
-        boardString.append("  ");
-        boardString.append(RESET_BG_COLOR).append("\n");
-        return boardString.toString();
     }
 
     private void drawPieces(ChessPiece piece, StringBuilder boardString) {

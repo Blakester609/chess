@@ -64,10 +64,11 @@ public class WebSocketHandler {
             playerColor = "black";
         }
         var message = String.format("%s has joined game %s as %s", username, gameData.gameName(), playerColor);
-        var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(serverMessage);
+
         var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, playerColor);
-        connections.broadcast(loadGameMessage);
+        connections.broadcast(loadGameMessage, command.getGameID());
+        var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
     private void leaveGame(Session session, String username, UserGameCommand command) {

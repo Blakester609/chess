@@ -49,7 +49,7 @@ public class Repl implements ServerMessageObserver {
         if(message.getServerMessageType() == LOAD_GAME) {
             LoadGameMessage someMessage = (LoadGameMessage) message;
             System.out.println();
-            System.out.println(client.drawBoard(someMessage.getGameData().getGame().getBoard(), someMessage.getPlayerColor()));
+            System.out.println(client.drawBoard(someMessage.getGameData().getGame().getBoard(), someMessage.getGameData()));
         }
 
         printPrompt();
