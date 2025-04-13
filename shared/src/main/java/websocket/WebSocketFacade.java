@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import exception.DataAccessException;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 import javax.websocket.*;
@@ -14,8 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static websocket.commands.UserGameCommand.CommandType.CONNECT;
-import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
-import static websocket.messages.ServerMessage.ServerMessageType.NOTIFICATION;
+import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 public class WebSocketFacade extends Endpoint {
 
@@ -39,6 +39,9 @@ public class WebSocketFacade extends Endpoint {
                         ServerMessage someMessage = new Gson().fromJson(message, ServerMessage.class);
                         if(someMessage.getServerMessageType() == NOTIFICATION) {
                            NotificationMessage newMessage = new Gson().fromJson(message, NotificationMessage.class);
+                           observer.notify(newMessage);
+                        } else if(someMessage.getServerMessageType()  == LOAD_GAME) {
+                            LoadGameMessage newMessage = new Gson().fromJson(message, LoadGameMessage.class);
                             observer.notify(newMessage);
                         }
                     } catch (Exception e) {

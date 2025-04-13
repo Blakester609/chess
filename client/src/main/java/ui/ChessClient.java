@@ -1,6 +1,9 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.AuthData;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static chess.ChessGame.TeamColor.WHITE;
 import static ui.EscapeSequences.*;
 
 public class ChessClient {
@@ -165,7 +169,7 @@ public class ChessClient {
             var playerColor = params[1];
             ChessGame.TeamColor actualPlayerColor = null;
             if (playerColor.equals("white") || playerColor.equals("WHITE")) {
-                actualPlayerColor = ChessGame.TeamColor.WHITE;
+                actualPlayerColor = WHITE;
             } else if (playerColor.equals("black") || playerColor.equals("BLACK")) {
                 actualPlayerColor = ChessGame.TeamColor.BLACK;
             } else {
@@ -177,14 +181,84 @@ public class ChessClient {
             } catch (Exception e) {
                 throw new DataAccessException("Must provide a valid game ID as an integer, e.g. join 1 white/black", 400);
             }
-            if(actualPlayerColor == ChessGame.TeamColor.WHITE) {
-                drawBoardWhitePerspective();
-            } else {
-                drawBoardBlackPerspective();
-            }
+//            if(actualPlayerColor == ChessGame.TeamColor.WHITE) {
+//                drawBoardWhitePerspective();
+//            } else {
+//                drawBoardBlackPerspective();
+//            }
             return "";
         }
         throw new DataAccessException("Expected: <GAMEID> [WHITE|BLACK]", 400);
+    }
+
+    public String drawBoard(ChessBoard board, String playerColor) {
+        StringBuilder boardString = new StringBuilder();
+        boardString.append(ERASE_SCREEN);
+        boardString.append(SET_BG_COLOR_LIGHT_GREY);
+        boardString.append(SET_TEXT_COLOR_BLACK);
+        boardString.append(EMPTY);
+        boardString.append(EMPTY);
+        String[] columnLabels = {"a", "b", "c", "d", "e", "f", "g", "h"};
+        for (String columnLabel : columnLabels) {
+            boardString.append(columnLabel).append("  ");
+        }
+        boardString.append("  ").append(RESET_BG_COLOR).append("\n");
+        for(int i = 7; i >= 0; i--) {
+            boardString.append(SET_BG_COLOR_LIGHT_GREY);
+            boardString.append(SET_TEXT_COLOR_BLACK);
+            boardString.append(EMPTY);
+            boardString.append(i + 1).append(" ");
+            for(int j = 7; j >= 0; j--) {
+                ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
+                if(((j % 2 == 1) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 0))) {
+                    if(piece != null) {
+                        boardString.append(SET_BG_COLOR_WHITE);
+                    } else {
+                        boardString.append(SET_BG_COLOR_WHITE + "   ");
+                    }
+                } else {
+                    if (piece != null) {
+                        boardString.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        boardString.append(SET_BG_COLOR_DARK_GREY + "   ");
+                    }
+                }
+                drawPieces(piece, boardString);
+            }
+            boardString.append(SET_BG_COLOR_LIGHT_GREY);
+            boardString.append(SET_TEXT_COLOR_BLACK);
+            boardString.append(" ").append(i+1).append(" ");
+            boardString.append(RESET_BG_COLOR).append("\n");
+        }
+        boardString.append(SET_BG_COLOR_LIGHT_GREY);
+        boardString.append(SET_TEXT_COLOR_BLACK);
+        boardString.append(EMPTY);
+        boardString.append(EMPTY);
+        for (String columnLabel : columnLabels) {
+            boardString.append(columnLabel).append("  ");
+        }
+        boardString.append("  ");
+        boardString.append(RESET_BG_COLOR).append("\n");
+        return boardString.toString();
+    }
+
+    private void drawPieces(ChessPiece piece, StringBuilder boardString) {
+        if(piece != null) {
+            if(piece.getTeamColor() == WHITE) {
+                boardString.append(SET_TEXT_COLOR_RED);
+            } else {
+                boardString.append(SET_TEXT_COLOR_BLUE);
+            }
+            switch(piece.getPieceType()) {
+                case ChessPiece.PieceType.PAWN -> boardString.append(" P ");
+                case ChessPiece.PieceType.QUEEN -> boardString.append(" Q ");
+                case ChessPiece.PieceType.BISHOP -> boardString.append(" B ");
+                case ChessPiece.PieceType.KNIGHT -> boardString.append(" N ");
+                case ChessPiece.PieceType.ROOK -> boardString.append(" R ");
+                case ChessPiece.PieceType.KING -> boardString.append(" K ");
+                default -> boardString.append(" X ");
+            }
+        }
     }
 
     public String displayHelp() {

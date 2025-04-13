@@ -66,7 +66,7 @@ public class WebSocketHandler {
         var message = String.format("%s has joined game %s as %s", username, gameData.gameName(), playerColor);
         var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(serverMessage);
-        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData);
+        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, playerColor);
         connections.broadcast(loadGameMessage);
     }
 
