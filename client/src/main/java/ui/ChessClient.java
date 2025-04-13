@@ -118,10 +118,10 @@ public class ChessClient {
             ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
             try {
                 var result = gson.fromJson(String.valueOf(games.get(gameIdsMap.get(realGameID)-1)), ListResult.class);
+                ws.connectToGame(userAuth, realGameID);
             } catch (Exception e) {
                 throw new DataAccessException("Must provide a valid game ID as an integer", 400);
             }
-            drawBoardWhitePerspective();
             return "";
         }
         throw new DataAccessException("Expected: <gameID>", 400);

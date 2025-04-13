@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager {
     public final ConcurrentHashMap<String, Connection> connections = new ConcurrentHashMap<>();
 
-    public void add(String username, Session session, Integer gameID) {
-        var connection = new Connection(username, session, gameID);
+    public void add(String username, Session session, Integer gameID, boolean onFirstConnect) {
+        var connection = new Connection(username, session, gameID, onFirstConnect);
         connections.put(username, connection);
     }
 
@@ -24,9 +24,11 @@ public class ConnectionManager {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if((Objects.equals(c.gameID, gameID))) {
+                if((Objects.equals(c.gameID, gameID)) && (!c.onFirstConnect)) {
                     c.send(notification.toString());
+                    c.onFirstConnect = true;
                 }
+
             } else {
                 removeList.add(c);
             }

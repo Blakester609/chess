@@ -43,6 +43,9 @@ public class WebSocketFacade extends Endpoint {
                         } else if(someMessage.getServerMessageType()  == LOAD_GAME) {
                             LoadGameMessage newMessage = new Gson().fromJson(message, LoadGameMessage.class);
                             observer.notify(newMessage);
+                        } else if(someMessage.getServerMessageType() == ERROR) {
+                            ErrorMessage newMessage = new Gson().fromJson(message, ErrorMessage.class);
+                            observer.notify(newMessage);
                         }
                     } catch (Exception e) {
                         observer.notify(new ErrorMessage(ERROR, e.getMessage()));

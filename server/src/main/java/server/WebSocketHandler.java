@@ -50,7 +50,7 @@ public class WebSocketHandler {
     }
 
     private void sendMessage(RemoteEndpoint remote, ErrorMessage errorMessage) throws IOException {
-        remote.sendString(errorMessage.getErrorMessage());
+        remote.sendString(errorMessage.toString());
     }
 
     private void resign(Session session, String username, UserGameCommand command) {
@@ -81,7 +81,7 @@ public class WebSocketHandler {
     private void saveSession(String username, Integer gameID, Session session) throws Exception {
         System.out.println("Trying to save session");
         try {
-            connections.add(username, session, gameID);
+            connections.add(username, session, gameID, false);
         } catch (Exception e) {
             throw e;
         }
