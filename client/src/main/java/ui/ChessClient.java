@@ -1,9 +1,6 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessBoard;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.AuthData;
@@ -21,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static chess.ChessGame.TeamColor.BLACK;
 import static chess.ChessGame.TeamColor.WHITE;
 import static ui.EscapeSequences.*;
 
@@ -33,6 +31,9 @@ public class ChessClient {
     private ServerMessageObserver serverMessageObserver;
     private HashMap<Integer, Integer> gameIdsMap = new HashMap<>();
     private boolean signedIn = false;
+    private boolean isJoinedToGame = false;
+    private int currentGameID = -1;
+    private ChessGame.TeamColor myTeamColor;
     private final PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
     public ChessClient(String serverUrl, ServerMessageObserver serverMessageObserver) {
@@ -55,12 +56,73 @@ public class ChessClient {
                 case "join" -> playGame(params);
                 case "list" -> listGames();
                 case "observe" -> observeGame(params);
+                case "move" -> makeMove(params);
+                case "leave" -> leaveGame(params);
                 case "quit" -> "quit";
                 default -> "try again";
             };
         } catch (DataAccessException e) {
             return e.getMessage();
         }
+    }
+
+    private String makeMove(String[] params) throws DataAccessException {
+        assertSignedIn();
+        assertIsJoinedToGame();
+        if(params.length >= 2) {
+            var startPositionString = params[0];
+            var endPositionString = params[1];
+            var moveString = startPositionString + endPositionString;
+            char[] columnLabels = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+            int[] colIndex = {1, 2, 3, 4, 5, 6, 7, 8};
+            var startPosColumn = startPositionString.charAt(0);
+            var startPosRow = Integer.parseInt(String.valueOf(startPositionString.charAt(1)));
+
+            var endPosColumn = endPositionString.charAt(0);
+            var endPosRow = Integer.parseInt(String.valueOf(endPositionString.charAt(1)));
+            HashMap<Character, Integer> columnIndices = new HashMap<>();
+            if(myTeamColor == BLACK) {
+                colIndex = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+            }
+            for(int i = 0; i < 7; i++) {
+                columnIndices.put(columnLabels[i], colIndex[i]);
+            }
+
+            var startPosition = new ChessPosition(startPosRow, columnIndices.get(startPosColumn));
+            var endPosition = new ChessPosition(endPosRow, columnIndices.get(endPosColumn));
+            try {
+                if(params.length >= 3) {
+                    var promotionPieceString = params[2];
+                    ChessPiece.PieceType promotionPiece = getPromotionPieceType(promotionPieceString);
+
+                    ws.makeMove(userAuth, currentGameID, new ChessMove(startPosition, endPosition, promotionPiece), moveString);
+                } else {
+                    ws.makeMove(userAuth, currentGameID, new ChessMove(startPosition, endPosition, null), moveString);
+                }
+            } catch (Exception e) {
+                throw e;
+            }
+
+        }
+        return "";
+    }
+
+    private String leaveGame(String[] params) throws DataAccessException {
+        assertSignedIn();
+        assertIsJoinedToGame();
+        isJoinedToGame = false;
+        ws.leaveGame(userAuth, currentGameID);
+        return "";
+    }
+
+    private ChessPiece.PieceType getPromotionPieceType(String promotionPieceString) {
+        return switch (promotionPieceString) {
+            case "queen" -> ChessPiece.PieceType.QUEEN;
+            case "bishop" -> ChessPiece.PieceType.BISHOP;
+            case "rook" -> ChessPiece.PieceType.ROOK;
+            case "knight" -> ChessPiece.PieceType.KNIGHT;
+            default -> null;
+        };
     }
 
     public String login(String... params) throws DataAccessException {
@@ -117,7 +179,9 @@ public class ChessClient {
             var gson = new Gson();
             ArrayList<ListResult> games = (ArrayList<ListResult>) gamesList.get("games");
             try {
-                var result = gson.fromJson(String.valueOf(games.get(gameIdsMap.get(realGameID)-1)), ListResult.class);
+                var result = gson.fromJson(String.valueOf(games.get(gameIdsMap.get(realGameID))), ListResult.class);
+                isJoinedToGame = true;
+                currentGameID = Integer.parseInt(gameID);
                 ws.connectToGame(userAuth, realGameID);
             } catch (Exception e) {
                 throw new DataAccessException("Must provide a valid game ID as an integer", 400);
@@ -172,15 +236,20 @@ public class ChessClient {
             ChessGame.TeamColor actualPlayerColor = null;
             if (playerColor.equals("white") || playerColor.equals("WHITE")) {
                 actualPlayerColor = WHITE;
+                myTeamColor = WHITE;
             } else if (playerColor.equals("black") || playerColor.equals("BLACK")) {
-                actualPlayerColor = ChessGame.TeamColor.BLACK;
+                actualPlayerColor = BLACK;
+                myTeamColor = BLACK;
             } else {
                 throw new DataAccessException("Must choose black or white team color", 400);
             }
             try {
+                isJoinedToGame = true;
+                currentGameID = Integer.parseInt(gameID);
                 server.joinGame(new JoinRequest(actualPlayerColor, Integer.parseInt(gameID)), userAuth);
                 ws.connectToGame(userAuth, Integer.parseInt(gameID));
             } catch (Exception e) {
+                System.out.println(e.getMessage());
                 throw new DataAccessException("Must provide a valid game ID as an integer, e.g. join 1 white/black", 400);
             }
 //            if(actualPlayerColor == ChessGame.TeamColor.WHITE) {
@@ -201,14 +270,14 @@ public class ChessClient {
         boardString.append(EMPTY);
         boardString.append(EMPTY);
         String[] columnLabels = {"a", "b", "c", "d", "e", "f", "g", "h"};
-        if(gameData.getBlackUsername().equals(userName)) {
+        if(myTeamColor == BLACK) {
             columnLabels = new String[]{"h", "g", "f", "e", "d", "c", "b", "a"};
         }
         drawColumnLabels(columnLabels, boardString);
         boardString.append("  ").append(RESET_BG_COLOR).append("\n");
-        if(gameData.getWhiteUsername().equals(userName)) {
+        if(myTeamColor == WHITE) {
             drawTilesWhitePerspective(board, boardString);
-        } else if(gameData.getBlackUsername().equals(userName)) {
+        } else if(myTeamColor == BLACK) {
             drawTilesBlackPerspective(board, boardString);
         }
 
@@ -228,7 +297,7 @@ public class ChessClient {
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
-            for(int j = 0; j < 8; j++) {
+            for(int j = 7; j >= 0; j--) {
                 drawTheseTiles(board, boardString, i, j);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
@@ -240,7 +309,7 @@ public class ChessClient {
 
     private void drawTheseTiles(ChessBoard board, StringBuilder boardString, int i, int j) {
         ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
-        if(((j % 2 == 1) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 0))) {
+        if(((j % 2 == 0) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 1))) {
             if(piece != null) {
                 boardString.append(SET_BG_COLOR_WHITE);
             } else {
@@ -262,7 +331,7 @@ public class ChessClient {
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
-            for(int j = 7; j >= 0; j--) {
+            for(int j = 0; j < 8; j++) {
                 drawTheseTiles(board, boardString, i, j);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
@@ -306,6 +375,16 @@ public class ChessClient {
                     - help
                     """;
         }
+        if(isJoinedToGame) {
+            return SET_TEXT_COLOR_MAGENTA + """
+                    - redraw - redraws the current chess board
+                    - leave - leaves the current game
+                    - move <START> <END> <PROMOTIONPIECE> - move a piece from START to END, e.g. move e7 e8 queen.
+                    Only include the <PROMOTIONPIECE> field if you are promoting a pawn. 
+                    - resign - forfeit the current game
+                    - highlight <START> - highlight all legal moves for the piece at the position START
+                    """;
+        }
         return SET_TEXT_COLOR_MAGENTA + """
                 - create <GAMENAME> - create a game
                 - list - list all games
@@ -320,6 +399,12 @@ public class ChessClient {
     private void assertSignedIn() throws DataAccessException {
         if (!signedIn) {
             throw new DataAccessException("You must sign in", 400);
+        }
+    }
+
+    private void assertIsJoinedToGame() throws DataAccessException {
+        if(!isJoinedToGame) {
+            throw new DataAccessException("You must be joined to a game", 400);
         }
     }
 
@@ -434,9 +519,9 @@ public class ChessClient {
         out.print(firstRow + " ");
         out.print(textColor);
         if(pawnsFirst) {
-            printPawns(EscapeSequences.SET_BG_COLOR_WHITE, EscapeSequences.SET_BG_COLOR_DARK_GREY);
+            printPawns(SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY);
         } else {
-            printNotPawns(EscapeSequences.SET_BG_COLOR_WHITE, EscapeSequences.SET_BG_COLOR_DARK_GREY, blackPerspective);
+            printNotPawns(SET_BG_COLOR_WHITE, SET_BG_COLOR_DARK_GREY, blackPerspective);
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);
@@ -448,9 +533,9 @@ public class ChessClient {
         out.print(secondRow + " ");
         out.print(textColor);
         if(!pawnsFirst) {
-            printPawns(EscapeSequences.SET_BG_COLOR_DARK_GREY, EscapeSequences.SET_BG_COLOR_WHITE);
+            printPawns(SET_BG_COLOR_DARK_GREY, SET_BG_COLOR_WHITE);
         } else {
-            printNotPawns(EscapeSequences.SET_BG_COLOR_DARK_GREY, EscapeSequences.SET_BG_COLOR_WHITE, blackPerspective);
+            printNotPawns(SET_BG_COLOR_DARK_GREY, SET_BG_COLOR_WHITE, blackPerspective);
         }
         out.print(SET_BG_COLOR_LIGHT_GREY);
         out.print(SET_TEXT_COLOR_BLACK);

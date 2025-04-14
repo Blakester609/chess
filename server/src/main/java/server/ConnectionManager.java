@@ -40,6 +40,26 @@ public class ConnectionManager {
         }
     }
 
+    public void broadcastLoadGameAll(ServerMessage notification, Integer gameID) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if(Objects.equals(c.gameID, gameID)) {
+                    c.send(notification.toString());
+                    c.onFirstConnect = true;
+                }
+
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.username);
+        }
+    }
+
     public void broadcastNotification(String excludeUsername, ServerMessage notification, Integer gameID) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {

@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import exception.DataAccessException;
 import model.GameData;
 
@@ -76,5 +77,10 @@ public class MemoryGameDAO implements GameDAO {
             }
         }
         throw new DataAccessException("Error: an unknown error occurred", 500);
+    }
+
+    @Override
+    public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
+        return null;
     }
 }

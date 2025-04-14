@@ -1,6 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.DataAccessException;
 import model.GameData;
@@ -66,6 +67,21 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
                 throw new DataAccessException("Error: already taken", 403);
             default:
                 throw new DataAccessException("Error: bad request", 400);
+        }
+    }
+
+    @Override
+    public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
+        try {
+            var statement = "UPDATE Game SET json=? WHERE id=?";
+            GameData game = getGame(gameID);
+            ChessGame someGame = game.getGame();
+            someGame.makeMove(move);
+            var json = new Gson().toJson(game.getGame());
+            executeUpdate(statement, json, gameID);
+            return game;
+        } catch(Exception e) {
+            throw new DataAccessException("Error: invalid move request", 400);
         }
     }
 

@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessMove;
 import dataaccess.AuthDAO;
 import exception.DataAccessException;
 import dataaccess.GameDAO;
@@ -8,7 +9,6 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class UserService {
@@ -55,6 +55,10 @@ public class UserService {
 
     public GameData retrieveGameData(int gameID) throws DataAccessException {
         return gameDao.getGame(gameID);
+    }
+
+    public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
+        return gameDao.updateGameState(gameID, move);
     }
 
     public ArrayList<ListResult> list(String authToken) throws DataAccessException {

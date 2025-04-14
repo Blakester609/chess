@@ -1,5 +1,7 @@
 package server;
 
+import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.*;
@@ -15,6 +17,7 @@ import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
+import static websocket.commands.UserGameCommand.CommandType.MAKE_MOVE;
 import static websocket.messages.ServerMessage.ServerMessageType.ERROR;
 
 @WebSocket
@@ -37,7 +40,10 @@ public class WebSocketHandler {
 
             switch(command.getCommandType()) {
                 case CONNECT -> connect(session, username, command);
-                case MAKE_MOVE -> makeMove(session, username, (MakeMoveCommand) command);
+                case MAKE_MOVE -> {
+                    MakeMoveCommand moveCommand = new Gson().fromJson(msg, MakeMoveCommand.class);
+                    makeMove(session, username, moveCommand, moveCommand.getMoveString());
+                }
                 case LEAVE -> leaveGame(session, username, command);
                 case RESIGN -> resign(session, username, command);
             }
@@ -71,11 +77,22 @@ public class WebSocketHandler {
         connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) {
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
+        var message = String.format("%s has left the game", username);
+        var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
-    private void makeMove(Session session, String username, MakeMoveCommand command) {
-        
+    private void makeMove(Session session, String username, MakeMoveCommand command, String moveString) throws DataAccessException, IOException {
+        GameData gameData = userService.retrieveGameData(command.getGameID());
+        gameData = userService.updateGameState(command.getGameID(), command.getMove());
+
+        var message = String.format("%s made the move %s", username, moveString);
+
+        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, "");
+        connections.broadcastLoadGameAll(loadGameMessage, command.getGameID());
+        var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
     private void saveSession(String username, Integer gameID, Session session) throws Exception {

@@ -2,8 +2,10 @@ package websocket;
 
 //import org.glassfish.tyrus.core.wsadl.model.Endpoint;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.DataAccessException;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -14,7 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static websocket.commands.UserGameCommand.CommandType.CONNECT;
+import static websocket.commands.UserGameCommand.CommandType.*;
 import static websocket.messages.ServerMessage.ServerMessageType.*;
 
 public class WebSocketFacade extends Endpoint {
@@ -72,6 +74,24 @@ public class WebSocketFacade extends Endpoint {
             var command = new UserGameCommand(CONNECT, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         }catch(IOException e) {
+            throw new DataAccessException(e.getMessage(), 500);
+        }
+    }
+
+    public void leaveGame(String authToken, Integer gameID) throws DataAccessException {
+        try {
+            var command = new UserGameCommand(LEAVE, authToken, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new DataAccessException(e.getMessage(), 500);
+        }
+    }
+
+    public void makeMove(String authToken, Integer gameID, ChessMove move, String moveString) throws DataAccessException {
+        try {
+            var command = new MakeMoveCommand(MAKE_MOVE, authToken, gameID, move, moveString);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
             throw new DataAccessException(e.getMessage(), 500);
         }
     }
