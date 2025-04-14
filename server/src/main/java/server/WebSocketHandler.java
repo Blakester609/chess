@@ -80,6 +80,7 @@ public class WebSocketHandler {
     private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
         var message = String.format("%s has left the game", username);
         var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.remove(username);
         connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
