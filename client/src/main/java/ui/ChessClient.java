@@ -321,7 +321,7 @@ public class ChessClient {
         drawColumnLabels(columnLabels, boardString);
         boardString.append("  ");
         boardString.append(RESET_BG_COLOR).append("\n");
-        System.out.println(board);
+//        System.out.println(board);
         return boardString.toString();
     }
 
@@ -368,15 +368,18 @@ public class ChessClient {
         if(!validMoves.isEmpty()) {
             for(ChessMove move : validMoves) {
                 if(move.getEndPosition().equals(new ChessPosition(i+1, j+1))) {
-                    if(piece != null) {
-                        boardString.append(setBgColorGreen);
-                    } else {
-                        boardString.delete(boardString.length()-3, boardString.length());
-                        boardString.append(setBgColorGreen + "   ");
-                    }
-
+                    drawHighlight(boardString, piece, setBgColorGreen);
                 }
             }
+        }
+    }
+
+    private void drawHighlight(StringBuilder boardString, ChessPiece piece, String setBgColorGreen) {
+        if(piece != null) {
+            boardString.append(setBgColorGreen);
+        } else {
+            boardString.delete(boardString.length()-3, boardString.length());
+            boardString.append(setBgColorGreen + "   ");
         }
     }
 
