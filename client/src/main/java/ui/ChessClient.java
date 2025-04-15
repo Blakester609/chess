@@ -33,6 +33,7 @@ public class ChessClient {
     private boolean signedIn = false;
     private boolean isJoinedToGame = false;
     private int currentGameID = -1;
+    private GameData currentGameData;
     private ChessGame.TeamColor myTeamColor;
     private final PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
 
@@ -60,6 +61,7 @@ public class ChessClient {
                 case "leave" -> leaveGame(params);
                 case "resign" -> resignGame(params);
                 case "highlight" -> highlightMove(params);
+                case "redraw" -> redrawBoard();
                 case "quit" -> "quit";
                 default -> "try again";
             };
@@ -68,13 +70,31 @@ public class ChessClient {
         }
     }
 
+    private String redrawBoard() throws DataAccessException {
+        assertSignedIn();
+        assertIsJoinedToGame();
+        return drawBoard(currentGameData.getGame().getBoard(), currentGameData, null);
+    }
+
     private String highlightMove(String[] params) throws DataAccessException {
         assertSignedIn();
         assertIsJoinedToGame();
         if(params.length >= 1) {
             var startPositionString = params[0];
+            char[] columnLabels = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+            int[] colIndex = {1, 2, 3, 4, 5, 6, 7, 8};
+            var startPosColumn = startPositionString.charAt(0);
+            var startPosRow = Integer.parseInt(String.valueOf(startPositionString.charAt(1)));
+            HashMap<Character, Integer> columnIndices = new HashMap<>();
+            if(myTeamColor == BLACK) {
+                colIndex = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+            }
+            for(int i = 0; i < 7; i++) {
+                columnIndices.put(columnLabels[i], colIndex[i]);
+            }
 
-
+            var startPosition = new ChessPosition(startPosRow, columnIndices.get(startPosColumn));
+            return drawBoard(currentGameData.getGame().getBoard(), currentGameData, startPosition);
         }
         return "";
     }
@@ -135,6 +155,7 @@ public class ChessClient {
         assertIsJoinedToGame();
         isJoinedToGame = false;
         ws.leaveGame(userAuth, currentGameID);
+        currentGameID = -1;
         return "";
     }
 
@@ -286,7 +307,8 @@ public class ChessClient {
         throw new DataAccessException("Expected: <GAMEID> [WHITE|BLACK]", 400);
     }
 
-    public String drawBoard(ChessBoard board, GameData gameData) {
+    public String drawBoard(ChessBoard board, GameData gameData, ChessPosition startPosition) {
+        currentGameData = gameData;
         StringBuilder boardString = new StringBuilder();
         boardString.append(ERASE_SCREEN);
         boardString.append(SET_BG_COLOR_LIGHT_GREY);
@@ -300,9 +322,9 @@ public class ChessClient {
         drawColumnLabels(columnLabels, boardString);
         boardString.append("  ").append(RESET_BG_COLOR).append("\n");
         if(myTeamColor == WHITE) {
-            drawTilesWhitePerspective(board, boardString);
+            drawTilesWhitePerspective(board, boardString, startPosition, gameData);
         } else if(myTeamColor == BLACK) {
-            drawTilesBlackPerspective(board, boardString);
+            drawTilesBlackPerspective(board, boardString, startPosition, gameData);
         }
 
         boardString.append(SET_BG_COLOR_LIGHT_GREY);
@@ -312,17 +334,19 @@ public class ChessClient {
         drawColumnLabels(columnLabels, boardString);
         boardString.append("  ");
         boardString.append(RESET_BG_COLOR).append("\n");
+        System.out.println(board);
         return boardString.toString();
     }
 
-    private void drawTilesBlackPerspective(ChessBoard board, StringBuilder boardString) {
+    private void drawTilesBlackPerspective(ChessBoard board, StringBuilder boardString,
+                                           ChessPosition startPosition, GameData gameData) {
         for(int i = 0; i < 8; i++) {
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
-            for(int j = 7; j >= 0; j--) {
-                drawTheseTiles(board, boardString, i, j);
+            for(int j = 0; j < 8; j++) {
+                drawTheseTiles(board, boardString, i, j, startPosition, gameData);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);
@@ -331,32 +355,66 @@ public class ChessClient {
         }
     }
 
-    private void drawTheseTiles(ChessBoard board, StringBuilder boardString, int i, int j) {
+    private void drawTheseTiles(ChessBoard board, StringBuilder boardString, int i, int j,
+                                ChessPosition startPosition, GameData gameData) {
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        if(startPosition != null) {
+            validMoves = (ArrayList<ChessMove>) gameData.getGame().validMoves(startPosition);
+        }
         ChessPiece piece = board.getPiece(new ChessPosition(i+1, j+1));
         if(((j % 2 == 0) && (i % 2 == 1)) || ((i % 2 == 0) && (j % 2 == 1))) {
             if(piece != null) {
                 boardString.append(SET_BG_COLOR_WHITE);
-            } else {
+            }
+            else {
                 boardString.append(SET_BG_COLOR_WHITE + "   ");
+            }
+            if(!validMoves.isEmpty()) {
+                for(ChessMove move : validMoves) {
+                    if(move.getEndPosition().equals(new ChessPosition(i+1, j+1))) {
+                        if(piece != null) {
+                            boardString.append(SET_BG_COLOR_GREEN);
+                        } else {
+                            boardString.delete(boardString.length()-3, boardString.length());
+                            boardString.append(SET_BG_COLOR_GREEN + "   ");
+                        }
+
+                    }
+                }
             }
         } else {
             if (piece != null) {
                 boardString.append(SET_BG_COLOR_DARK_GREY);
-            } else {
+            }
+            else {
                 boardString.append(SET_BG_COLOR_DARK_GREY + "   ");
+            }
+            if(!validMoves.isEmpty()) {
+                for(ChessMove move : validMoves) {
+                    if(move.getEndPosition().equals(new ChessPosition(i+1, j+1))) {
+                        if(piece != null) {
+                            boardString.append(SET_BG_COLOR_DARK_GREEN);
+                        } else {
+                            boardString.delete(boardString.length()-3, boardString.length());
+                            boardString.append(SET_BG_COLOR_DARK_GREEN + "   ");
+                        }
+
+                    }
+                }
             }
         }
         drawPieces(piece, boardString);
     }
 
-    private void drawTilesWhitePerspective(ChessBoard board, StringBuilder boardString) {
+    private void drawTilesWhitePerspective(ChessBoard board, StringBuilder boardString,
+                                           ChessPosition startPosition, GameData gameData) {
         for(int i = 7; i >= 0; i--) {
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
             for(int j = 0; j < 8; j++) {
-                drawTheseTiles(board, boardString, i, j);
+                drawTheseTiles(board, boardString, i, j, startPosition, gameData);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
             boardString.append(SET_TEXT_COLOR_BLACK);

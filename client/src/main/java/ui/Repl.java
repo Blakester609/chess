@@ -57,7 +57,7 @@ public class Repl implements ServerMessageObserver {
         if(message.getServerMessageType() == LOAD_GAME) {
             LoadGameMessage someMessage = (LoadGameMessage) message;
             System.out.println();
-            System.out.println(client.drawBoard(someMessage.getGameData().getGame().getBoard(), someMessage.getGameData()));
+            System.out.println(client.drawBoard(someMessage.getGameData().getGame().getBoard(), someMessage.getGameData(), null));
         }
         if(message.getServerMessageType() == ERROR) {
             ErrorMessage someMessage = (ErrorMessage) message;

@@ -98,7 +98,6 @@ public class ChessGame {
         getBoard().addPiece(possibleMove.getEndPosition(), piece);
         getBoard().removePiece(startPosition);
         boolean isCheck = isInCheck(chessTeam);
-        System.out.println("Is check: " + isCheck);
         if(isCheck) {
             getBoard().addPiece(startPosition, piece);
             getBoard().removePiece(possibleMove.getEndPosition());
@@ -381,8 +380,6 @@ public class ChessGame {
     private boolean checkIfPawnCanCheck(ChessPosition kingPosition, TeamColor opposingColor, ChessPiece piece, ChessPosition pos) {
         if(piece.getPieceType() == PAWN) {
             boolean couldCheck = isCouldCheck(kingPosition, opposingColor, pos);
-            System.out.print("Pawn could check: ");
-            System.out.println(couldCheck);
             return couldCheck;
         }
         return false;
