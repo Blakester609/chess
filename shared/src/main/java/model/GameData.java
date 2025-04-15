@@ -8,6 +8,7 @@ public class GameData {
     private String blackUsername;
     private final String gameName;
     private ChessGame game;
+    private boolean isGameOver = false;
 
 
     public GameData(int gameID, String whiteUsername, String blackUsername, String gameName, ChessGame game) {
@@ -26,6 +27,13 @@ public class GameData {
         return gameName;
     }
 
+    public void setIsGameOver(boolean isGameOver) {
+        this.isGameOver = isGameOver;
+    }
+
+    public boolean getIsGameOver() {
+        return this.isGameOver;
+    }
 
     public void setWhiteUsername(String whiteUsername) {
         this.whiteUsername = whiteUsername;

@@ -59,7 +59,23 @@ public class WebSocketHandler {
         remote.sendString(errorMessage.toString());
     }
 
-    private void resign(Session session, String username, UserGameCommand command) {
+    private void resign(Session session, String username, UserGameCommand command) throws DataAccessException, IOException {
+        GameData gameData = userService.retrieveGameDataWithIsOver(command.getGameID());
+        if(gameData.getIsGameOver()) {
+            throw new DataAccessException("Error: cannot resign from game that is already over", 403);
+        }
+        gameData = userService.updateGameIsOver(command.getGameID(), true);
+        String playerColor = "";
+        if(gameData.getWhiteUsername().equals(username)) {
+            playerColor = "white";
+        } else if(gameData.getBlackUsername().equals(username)) {
+            playerColor = "black";
+        } else {
+            throw new DataAccessException("Error: cannot resign as observer", 403);
+        }
+        var message = String.format("%s has resigned the game. Game over!", playerColor);
+        var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcastLoadGameAll(serverMessage, command.getGameID());
         
     }
     
@@ -77,15 +93,34 @@ public class WebSocketHandler {
         connections.broadcastNotification(username, serverMessage, command.getGameID());
     }
 
-    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException {
+    private void leaveGame(Session session, String username, UserGameCommand command) throws IOException, DataAccessException {
+        GameData gameData = userService.retrieveGameData(command.getGameID());
+        userService.leaveGame(command.getGameID(), username);
         var message = String.format("%s has left the game", username);
         var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.remove(username);
         connections.broadcastNotification(username, serverMessage, command.getGameID());
+        connections.remove(username);
     }
 
     private void makeMove(Session session, String username, MakeMoveCommand command, String moveString) throws DataAccessException, IOException {
-        GameData gameData = userService.retrieveGameData(command.getGameID());
+        GameData gameData = userService.retrieveGameDataWithIsOver(command.getGameID());
+        if(gameData.getIsGameOver()) {
+            throw new DataAccessException("Error: cannot resign from game that is already over", 403);
+        }
+        boolean isObserver = gameData.getWhiteUsername().equals(username) || gameData.getBlackUsername().equals(username);
+        if(gameData.getWhiteUsername().equals(username)) {
+            if(gameData.getGame().getTeamTurn() == ChessGame.TeamColor.BLACK) {
+                throw new DataAccessException("Error: Cannot make move for other player", 403);
+            }
+        }
+        if(gameData.getBlackUsername().equals(username)) {
+            if(gameData.getGame().getTeamTurn() == ChessGame.TeamColor.WHITE) {
+                throw new DataAccessException("Error: Cannot make move for other player", 403);
+            }
+        }
+        if(!isObserver) {
+            throw new DataAccessException("Error: cannot make move as observer", 403);
+        }
         gameData = userService.updateGameState(command.getGameID(), command.getMove());
 
         var message = String.format("%s made the move %s", username, moveString);

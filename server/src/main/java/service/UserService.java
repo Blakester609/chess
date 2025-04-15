@@ -57,8 +57,20 @@ public class UserService {
         return gameDao.getGame(gameID);
     }
 
+    public GameData retrieveGameDataWithIsOver(int gameID) throws DataAccessException {
+        return gameDao.getGameWithIsOver(gameID);
+    }
+
     public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
         return gameDao.updateGameState(gameID, move);
+    }
+
+    public GameData updateGameIsOver(int gameID, boolean gameIsOver) throws DataAccessException {
+        return gameDao.updateGameIsOver(gameID, gameIsOver);
+    }
+
+    public boolean leaveGame(int gameID, String username) throws DataAccessException {
+        return gameDao.removeUserFromGame(gameID, username);
     }
 
     public ArrayList<ListResult> list(String authToken) throws DataAccessException {

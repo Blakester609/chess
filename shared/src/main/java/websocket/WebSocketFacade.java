@@ -82,6 +82,7 @@ public class WebSocketFacade extends Endpoint {
         try {
             var command = new UserGameCommand(LEAVE, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
+            this.session.close();
         } catch (IOException e) {
             throw new DataAccessException(e.getMessage(), 500);
         }
@@ -90,6 +91,15 @@ public class WebSocketFacade extends Endpoint {
     public void makeMove(String authToken, Integer gameID, ChessMove move, String moveString) throws DataAccessException {
         try {
             var command = new MakeMoveCommand(MAKE_MOVE, authToken, gameID, move, moveString);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new DataAccessException(e.getMessage(), 500);
+        }
+    }
+
+    public void resignGame(String authToken, Integer gameID) throws DataAccessException {
+        try {
+            var command = new UserGameCommand(RESIGN, authToken, gameID);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException e) {
             throw new DataAccessException(e.getMessage(), 500);

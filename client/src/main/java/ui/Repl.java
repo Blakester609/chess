@@ -26,8 +26,16 @@ public class Repl implements ServerMessageObserver {
             printPrompt();
             String line = scanner.nextLine();
             try {
-                result = client.eval(line);
-                System.out.println(SET_TEXT_COLOR_YELLOW + result);
+                if(line.equals("resign")) {
+                    System.out.println(SET_TEXT_COLOR_YELLOW + "Are you sure you want to resign? (yes/no)");
+                    printPrompt();
+                    line = scanner.nextLine();
+                    result = client.eval("resign " + line);
+                    System.out.println(SET_TEXT_COLOR_YELLOW + result);
+                } else {
+                    result = client.eval(line);
+                    System.out.println(SET_TEXT_COLOR_YELLOW + result);
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.println(msg);

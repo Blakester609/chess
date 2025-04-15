@@ -58,12 +58,23 @@ public class ChessClient {
                 case "observe" -> observeGame(params);
                 case "move" -> makeMove(params);
                 case "leave" -> leaveGame(params);
+                case "resign" -> resignGame(params);
                 case "quit" -> "quit";
                 default -> "try again";
             };
         } catch (DataAccessException e) {
             return e.getMessage();
         }
+    }
+
+    private String resignGame(String[] params) throws DataAccessException {
+        assertSignedIn();
+        assertIsJoinedToGame();
+        var yesOrNo = params[0];
+        if(yesOrNo.equals("yes")) {
+            ws.resignGame(userAuth, currentGameID);
+        }
+        return "";
     }
 
     private String makeMove(String[] params) throws DataAccessException {

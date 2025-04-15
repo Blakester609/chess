@@ -50,6 +50,10 @@ public class MemoryGameDAO implements GameDAO {
         throw new DataAccessException("Error: bad request", 400);
     }
 
+    @Override
+    public GameData getGameWithIsOver(int gameID) throws DataAccessException {
+        return null;
+    }
 
 
     @Override
@@ -80,7 +84,17 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
+    public boolean removeUserFromGame(int gameID, String username) throws DataAccessException {
+        return false;
+    }
+
+    @Override
     public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
+        return null;
+    }
+
+    @Override
+    public GameData updateGameIsOver(int gameID, boolean gameIsOver) throws DataAccessException {
         return null;
     }
 }

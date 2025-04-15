@@ -15,9 +15,13 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
 
     @Override
     public GameData createGame(GameData gameData) throws DataAccessException {
-        var statement = "INSERT INTO Game (whiteUsername, blackUsername, gameName, json) VALUES (?, ?, ?, ?)";
-        var json = new Gson().toJson(gameData.getGame());
-        var id = executeUpdate(statement, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), json);
+        var statement = "INSERT INTO Game (whiteUsername, blackUsername, gameName, json, isGameOver) VALUES (?, ?, ?, ?, ?)";
+        GameData newGameData = new GameData(gameData.gameID(), gameData.getWhiteUsername(),
+                gameData.getBlackUsername(), gameData.gameName(), new ChessGame());
+        var json = new Gson().toJson(newGameData);
+        int isGameOver = newGameData.getIsGameOver() ? 1 : 0;
+        var id = executeUpdate(statement, newGameData.getWhiteUsername(), newGameData.getBlackUsername(), newGameData.gameName(),
+                json, isGameOver);
         return new GameData(id, gameData.getWhiteUsername(), gameData.getBlackUsername(), gameData.gameName(), gameData.getGame());
     }
 
@@ -36,6 +40,34 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
                         var realJson = rs.getString("json");
                         var jsonString = new Gson().fromJson(realJson, ChessGame.class);
                         return new GameData(realId, realWhiteUsername, realBlackUsername, realGameName, jsonString);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException("Error: bad request", 400);
+        }
+        throw new DataAccessException("Error: bad request", 400);
+    }
+
+    @Override
+    public GameData getGameWithIsOver(int gameID) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT id, whiteUsername, blackUsername, gameName, json, isGameOver FROM Game WHERE id=?";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setInt(1, gameID);
+                try (var rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        var realId = rs.getInt("id");
+                        var realWhiteUsername = rs.getString("whiteUsername");
+                        var realBlackUsername = rs.getString("blackUsername");
+                        var realGameName = rs.getString("gameName");
+                        var realJson = rs.getString("json");
+                        var realIsGameOver = rs.getInt("isGameOver");
+                        boolean newIsGameOver = realIsGameOver == 1;
+                        var jsonString = new Gson().fromJson(realJson, ChessGame.class);
+                        GameData newGameData = new GameData(realId, realWhiteUsername, realBlackUsername, realGameName, jsonString);
+                        newGameData.setIsGameOver(newIsGameOver);
+                        return newGameData;
                     }
                 }
             }
@@ -71,6 +103,24 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
     }
 
     @Override
+    public boolean removeUserFromGame(int gameID, String username) throws DataAccessException {
+        GameData game = getGame(gameID);
+        if(game.getWhiteUsername().equals(username)) {
+            var statement = "UPDATE Game SET whiteUsername=? WHERE id=?";
+            String notClaimed = "unclaimed";
+            executeUpdate(statement, notClaimed, gameID);
+            return true;
+        } else if (game.getBlackUsername().equals(username)) {
+            var statement = "UPDATE Game SET blackUsername=? WHERE id=?";
+            String notClaimed = "unclaimed";
+            executeUpdate(statement, notClaimed, gameID);
+            return true;
+        } else {
+            return true;
+        }
+    }
+
+    @Override
     public GameData updateGameState(int gameID, ChessMove move) throws DataAccessException {
         try {
             var statement = "UPDATE Game SET json=? WHERE id=?";
@@ -83,6 +133,20 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
         } catch(Exception e) {
             throw new DataAccessException("Error: invalid move request", 400);
         }
+    }
+
+    @Override
+    public GameData updateGameIsOver(int gameID, boolean gameIsOver) throws DataAccessException {
+        try {
+            var statement = "UPDATE Game SET isGameOver=? WHERE id=?";
+            int isGameOver = gameIsOver ? 1 : 0;
+            executeUpdate(statement, isGameOver, gameID);
+            GameData game = getGameWithIsOver(gameID);
+            return game;
+        } catch (Exception e) {
+            throw new DataAccessException("Error: could not update isGameOver", 400);
+        }
+
     }
 
     @Override

@@ -76,6 +76,7 @@ public class MySqlDataAccess {
                 `blackUsername` varchar(256) DEFAULT NULL,
                 `gameName` varchar(256) NOT NULL,
                 `json` TEXT DEFAULT NULL,
+                `isGameOver` TINYINT,
                  PRIMARY KEY (`id`)
             )""",
 

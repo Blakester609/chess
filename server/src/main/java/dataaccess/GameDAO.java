@@ -12,9 +12,15 @@ public interface GameDAO {
 
     GameData getGame(int gameID) throws DataAccessException;
 
+    GameData getGameWithIsOver(int gameID) throws DataAccessException;
+
     boolean updateGame(String playerColor, int gameID, String username) throws DataAccessException;
 
+    boolean removeUserFromGame(int gameID, String username) throws DataAccessException;
+
     GameData updateGameState(int gameID, ChessMove move) throws DataAccessException;
+
+    GameData updateGameIsOver(int gameID, boolean gameIsOver) throws DataAccessException;
 
     ArrayList<GameData> listGames() throws DataAccessException;
 
