@@ -121,9 +121,27 @@ public class WebSocketHandler {
         if(!isObserver) {
             throw new DataAccessException("Error: cannot make move as observer", 403);
         }
+        String message = "";
         gameData = userService.updateGameState(command.getGameID(), command.getMove());
-
-        var message = String.format("%s made the move %s", username, moveString);
+        gameData = userService.retrieveGameDataWithIsOver(command.getGameID());
+        if(gameData.getIsGameOver()) {
+            if(gameData.getGame().isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                message = "White is in checkmate! Game over!";
+            } else if(gameData.getGame().isInCheckmate(ChessGame.TeamColor.BLACK)) {
+                message = "Black is checkmate! Game Over!";
+            } else if(gameData.getGame().isInStalemate(ChessGame.TeamColor.WHITE)
+                      || gameData.getGame().isInStalemate(ChessGame.TeamColor.BLACK)) {
+                message = "Stalemate! Game is over!";
+            }
+        } else {
+            if(gameData.getGame().isInCheck(ChessGame.TeamColor.WHITE)) {
+                message = "White is in check!";
+            } else if(gameData.getGame().isInCheck(ChessGame.TeamColor.BLACK)) {
+                message = "Black is in check!";
+            } else {
+                message = String.format("%s made the move %s", username, moveString);
+            }
+        }
 
         var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, "");
         connections.broadcastLoadGameAll(loadGameMessage, command.getGameID());
