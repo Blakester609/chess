@@ -4,9 +4,7 @@
       <root url="file://$PROJECT_DIR$/server/lib" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$PROJECT_DIR$/server/lib/passoff-dependencies.jar!/" />
-    </SOURCES>
+    <SOURCES />
     <jarDirectory url="file://$PROJECT_DIR$/server/lib" recursive="false" />
   </library>
 </component>
