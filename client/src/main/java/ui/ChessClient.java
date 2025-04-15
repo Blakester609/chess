@@ -124,9 +124,9 @@ public class ChessClient {
             var endPosColumn = endPositionString.charAt(0);
             var endPosRow = Integer.parseInt(String.valueOf(endPositionString.charAt(1)));
             HashMap<Character, Integer> columnIndices = new HashMap<>();
-            if(myTeamColor == BLACK) {
-                colIndex = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
-            }
+//            if(myTeamColor == BLACK) {
+//                colIndex = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+//            }
             for(int i = 0; i < 7; i++) {
                 columnIndices.put(columnLabels[i], colIndex[i]);
             }
@@ -345,7 +345,7 @@ public class ChessClient {
             boardString.append(SET_TEXT_COLOR_BLACK);
             boardString.append(EMPTY);
             boardString.append(i + 1).append(" ");
-            for(int j = 0; j < 8; j++) {
+            for(int j = 7; j >= 0; j--) {
                 drawTheseTiles(board, boardString, i, j, startPosition, gameData);
             }
             boardString.append(SET_BG_COLOR_LIGHT_GREY);
