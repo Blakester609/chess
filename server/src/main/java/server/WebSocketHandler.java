@@ -129,9 +129,6 @@ public class WebSocketHandler {
                 message = "White is in checkmate! Game over!";
             } else if(gameData.getGame().isInCheckmate(ChessGame.TeamColor.BLACK)) {
                 message = "Black is checkmate! Game Over!";
-            } else if(gameData.getGame().isInStalemate(ChessGame.TeamColor.WHITE)
-                      || gameData.getGame().isInStalemate(ChessGame.TeamColor.BLACK)) {
-                message = "Stalemate! Game is over!";
             }
         } else {
             if(gameData.getGame().isInCheck(ChessGame.TeamColor.WHITE)) {
@@ -142,7 +139,6 @@ public class WebSocketHandler {
                 message = String.format("%s made the move %s", username, moveString);
             }
         }
-
         var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameData, "");
         connections.broadcastLoadGameAll(loadGameMessage, command.getGameID());
         var serverMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);

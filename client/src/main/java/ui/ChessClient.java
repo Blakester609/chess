@@ -59,12 +59,24 @@ public class ChessClient {
                 case "move" -> makeMove(params);
                 case "leave" -> leaveGame(params);
                 case "resign" -> resignGame(params);
+                case "highlight" -> highlightMove(params);
                 case "quit" -> "quit";
                 default -> "try again";
             };
         } catch (DataAccessException e) {
             return e.getMessage();
         }
+    }
+
+    private String highlightMove(String[] params) throws DataAccessException {
+        assertSignedIn();
+        assertIsJoinedToGame();
+        if(params.length >= 1) {
+            var startPositionString = params[0];
+
+
+        }
+        return "";
     }
 
     private String resignGame(String[] params) throws DataAccessException {
@@ -210,6 +222,7 @@ public class ChessClient {
             AuthData auth;
             try {
                 auth = server.register(new UserData(username, password, email));
+                ws = new WebSocketFacade(serverUrl, serverMessageObserver);
             } catch (Exception e) {
                 throw new DataAccessException("Username is already taken. Try again.", 400);
             }

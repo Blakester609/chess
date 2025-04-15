@@ -128,12 +128,10 @@ public class MySqlGameDataAccess extends MySqlDataAccess implements GameDAO {
             ChessGame someGame = game.getGame();
             someGame.makeMove(move);
             if(someGame.isInCheckmate(ChessGame.TeamColor.WHITE)
-                    || someGame.isInStalemate(ChessGame.TeamColor.WHITE)
-                    || someGame.isInCheckmate(ChessGame.TeamColor.BLACK)
-                    || someGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+                    || someGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
                 game = updateGameIsOver(gameID, true);
             }
-            var json = new Gson().toJson(game.getGame());
+            var json = new Gson().toJson(someGame);
             executeUpdate(statement, json, gameID);
             return game;
         } catch(Exception e) {
