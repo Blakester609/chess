@@ -10,7 +10,7 @@ import server.ServerFacade;
 import service.JoinRequest;
 import service.ListResult;
 import websocket.ServerMessageObserver;
-import server.WebSocketFacade;
+import websocket.WebSocketFacade;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;

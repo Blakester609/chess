@@ -1,9 +1,8 @@
-package server;
+package websocket;
 
 import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.DataAccessException;
-import websocket.ServerMessageObserver;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
